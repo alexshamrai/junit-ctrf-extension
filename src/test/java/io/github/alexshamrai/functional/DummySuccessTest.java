@@ -1,7 +1,9 @@
-package ua.shamrai.functional;
+package io.github.alexshamrai.functional;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+@Tag("dummy")
 public class DummySuccessTest extends BaseTest {
 
     @Test

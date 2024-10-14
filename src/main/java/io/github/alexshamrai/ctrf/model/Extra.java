@@ -1,5 +1,6 @@
-package ua.shamrai.model;
+package io.github.alexshamrai.ctrf.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +12,8 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Extra {
+
     private Map<String, Object> customData;
 }

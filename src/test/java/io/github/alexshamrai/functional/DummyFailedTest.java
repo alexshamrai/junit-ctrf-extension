@@ -1,5 +1,6 @@
-package ua.shamrai.functional;
+package io.github.alexshamrai.functional;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 public class DummyFailedTest extends BaseTest {
@@ -11,6 +12,7 @@ public class DummyFailedTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Second failed test")
     void secondFailedTest() {
         System.out.println("DummyFailedTest secondFailedTest()");
         assert false;

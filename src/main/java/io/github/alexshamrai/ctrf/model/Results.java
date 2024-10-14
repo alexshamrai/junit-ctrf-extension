@@ -1,5 +1,6 @@
-package ua.shamrai.model;
+package io.github.alexshamrai.ctrf.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Results {
+
     private Tool tool;
     private Summary summary;
     private List<Test> tests;
