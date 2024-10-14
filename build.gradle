@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+}
+
+group = 'ua.shamrai'
+version = '0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    junitVersion = '5.10.0'
+    lombokVersion = '1.18.34'
+    jaksonVersion = '2.18.0'
+}
+
+dependencies {
+    implementation platform("org.junit:junit-bom:${junitVersion}")
+    implementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    implementation "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jaksonVersion}"
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
+
+test {
+    useJUnitPlatform()
+}
