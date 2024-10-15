@@ -1,18 +1,19 @@
 package io.github.alexshamrai.jupiter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.extension.*;
+import io.github.alexshamrai.FileWriter;
 import io.github.alexshamrai.ctrf.model.Results;
 import io.github.alexshamrai.ctrf.model.Summary;
 import io.github.alexshamrai.ctrf.model.Test;
 import io.github.alexshamrai.ctrf.model.Tool;
+import io.github.alexshamrai.model.TestDetails;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestWatcher;
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -27,9 +28,15 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
 
     private static final List<Test> tests = new ArrayList<>();
     private static final int MAX_MESSAGE_LENGTH = 1000;
+    private static final String UNKNOWN_CLASS = "UnknownClass";
 
     private static long testRunStartTime;
     private ThreadLocal<TestDetails> testDetails = new ThreadLocal<>();
+    private final FileWriter fileWriter;
+
+    public CtrfExtension() {
+        this.fileWriter = new FileWriter();
+    }
 
     @Override
     public void beforeAllTests(ExtensionContext context) {
@@ -57,27 +64,26 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
             .tests(tests)
             .build();
 
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            mapper.writeValue(new File("ctrf-report.json"), results);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        fileWriter.writeResultsToFile(results);
     }
 
     @Override
-    public void beforeEach(ExtensionContext context) throws Exception {
+    public void beforeEach(ExtensionContext context) {
         long startTime = System.currentTimeMillis();
         Set<String> tags = context.getTags();
         String filePath = context.getTestClass()
             .map(Class::getName)
-            .orElse("UnknownClass");
+            .orElse(UNKNOWN_CLASS);
 
-        testDetails.set(new TestDetails(startTime, tags, filePath));
+        testDetails.set(TestDetails.builder()
+            .startTime(startTime)
+            .tags(tags)
+            .filePath(filePath)
+            .build());
     }
 
     @Override
-    public void afterTestExecution(ExtensionContext context) throws Exception {
+    public void afterTestExecution(ExtensionContext context) {
         long stopTime = System.currentTimeMillis();
         TestDetails details = testDetails.get();
 
@@ -124,30 +130,6 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
 
             test.setMessage(message);
             test.setTrace(trace);
-        }
-    }
-
-    private static class TestDetails {
-        private final long startTime;
-        private final Set<String> tags;
-        private final String filePath;
-
-        public TestDetails(long startTime, Set<String> tags, String filePath) {
-            this.startTime = startTime;
-            this.tags = new HashSet<>(tags);
-            this.filePath = filePath;
-        }
-
-        public long getStartTime() {
-            return startTime;
-        }
-
-        public Set<String> getTags() {
-            return tags;
-        }
-
-        public String getFilePath() {
-            return filePath;
         }
     }
 }
