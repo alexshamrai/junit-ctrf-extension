@@ -1,6 +1,6 @@
 package io.github.alexshamrai;
 
-import io.github.alexshamrai.ctrf.model.Results;
+import io.github.alexshamrai.ctrf.model.CtrfJson;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.alexshamrai.util.ConfigReader;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +16,10 @@ public class FileWriter {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public void writeResultsToFile(Results results) {
+    public void writeResultsToFile(CtrfJson ctrfJson) {
         String filePath = ConfigReader.getProperty(REPORT_PATH_PROPERTY, DEFAULT_REPORT_PATH);
         try {
-            objectMapper.writeValue(new File(filePath), results);
+            objectMapper.writeValue(new File(filePath), ctrfJson);
         } catch (IOException e) {
             throw new RuntimeException("Failed to write results to file: " + filePath, e);
         }
