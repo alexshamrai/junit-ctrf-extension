@@ -1,6 +1,8 @@
 package io.github.alexshamrai.ctrf.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,6 +46,11 @@ public class Test {
         FAILED,
         SKIPPED,
         PENDING,
-        OTHER
+        OTHER;
+
+        @JsonValue
+        public String toLowerCase() {
+            return name().toLowerCase();
+        }
     }
 }
