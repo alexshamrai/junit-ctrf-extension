@@ -15,5 +15,11 @@ public class LongTest extends BaseTest {
         System.out.println("halfSecondTest");
         Thread.sleep(500);
     }
+
+    @Test
+    void twoSecondTest() throws InterruptedException {
+        System.out.println("TwoSecondTest");
+        Thread.sleep(2000);
+    }
 }
 
