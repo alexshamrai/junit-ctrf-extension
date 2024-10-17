@@ -1,6 +1,7 @@
 package io.github.alexshamrai.jupiter;
 
 import io.github.alexshamrai.FileWriter;
+import io.github.alexshamrai.ctrf.model.CtrfJson;
 import io.github.alexshamrai.ctrf.model.Results;
 import io.github.alexshamrai.ctrf.model.Summary;
 import io.github.alexshamrai.ctrf.model.Test;
@@ -18,11 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.github.alexshamrai.ctrf.model.Test.TestStatus.FAILED;
-import static io.github.alexshamrai.ctrf.model.Test.TestStatus.OTHER;
-import static io.github.alexshamrai.ctrf.model.Test.TestStatus.PASSED;
-import static io.github.alexshamrai.ctrf.model.Test.TestStatus.PENDING;
-import static io.github.alexshamrai.ctrf.model.Test.TestStatus.SKIPPED;
+import static io.github.alexshamrai.ctrf.model.Test.TestStatus.*;
 
 public class CtrfExtension implements TestRunExtension, BeforeEachCallback, AfterTestExecutionCallback, TestWatcher {
 
@@ -64,7 +61,11 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
             .tests(tests)
             .build();
 
-        fileWriter.writeResultsToFile(results);
+        CtrfJson ctrfJson = CtrfJson.builder()
+            .results(results)
+            .build();
+
+        fileWriter.writeResultsToFile(ctrfJson);
     }
 
     @Override
