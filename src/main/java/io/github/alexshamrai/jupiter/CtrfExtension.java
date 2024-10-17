@@ -31,7 +31,7 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
     private static final String UNKNOWN_CLASS = "UnknownClass";
 
     private static long testRunStartTime;
-    private ThreadLocal<TestDetails> testDetails = new ThreadLocal<>();
+    private final ThreadLocal<TestDetails> testDetails = new ThreadLocal<>();
     private final FileWriter fileWriter;
 
     public CtrfExtension() {
@@ -69,17 +69,7 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
 
     @Override
     public void beforeEach(ExtensionContext context) {
-        long startTime = System.currentTimeMillis();
-        Set<String> tags = context.getTags();
-        String filePath = context.getTestClass()
-            .map(Class::getName)
-            .orElse(UNKNOWN_CLASS);
-
-        testDetails.set(TestDetails.builder()
-            .startTime(startTime)
-            .tags(tags)
-            .filePath(filePath)
-            .build());
+        testDetails.set(createTestDetails(context));
     }
 
     @Override
@@ -111,7 +101,33 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
 
     @Override
     public void testDisabled(ExtensionContext context, Optional<String> reason) {
-        updateTestResult(context, SKIPPED, null);
+        TestDetails details = createTestDetails(context);
+        long stopTime = System.currentTimeMillis();
+        Test test = Test.builder()
+            .name(context.getDisplayName())
+            .tags(new ArrayList<>(details.getTags()))
+            .filepath(details.getFilePath())
+            .start(details.getStartTime())
+            .stop(stopTime)
+            .duration(stopTime - details.getStartTime())
+            .status(SKIPPED)
+            .build();
+
+        tests.add(test);
+    }
+
+    private TestDetails createTestDetails(ExtensionContext context) {
+        long startTime = System.currentTimeMillis();
+        Set<String> tags = context.getTags();
+        String filePath = context.getTestClass()
+            .map(Class::getName)
+            .orElse(UNKNOWN_CLASS);
+
+        return TestDetails.builder()
+            .startTime(startTime)
+            .tags(tags)
+            .filePath(filePath)
+            .build();
     }
 
     private void updateTestResult(ExtensionContext context, Test.TestStatus status, Throwable cause) {
