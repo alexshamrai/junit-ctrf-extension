@@ -3,6 +3,7 @@ import com.vanniktech.maven.publish.SonatypeHost
 plugins {
     id 'java'
     id 'signing'
+    id 'checkstyle'
     id 'com.vanniktech.maven.publish' version '0.30.0'
 }
 
@@ -30,6 +31,11 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+checkstyle {
+    toolVersion = '10.12.4'
+    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
 }
 
 mavenPublishing {
