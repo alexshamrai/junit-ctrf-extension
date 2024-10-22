@@ -7,7 +7,7 @@ public class LongTest extends BaseTest {
     @Test
     void oneSecondTest() throws InterruptedException {
         System.out.println("OneSecondTest");
-            Thread.sleep(1000);
+        Thread.sleep(1000);
     }
 
     @Test

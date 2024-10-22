@@ -19,7 +19,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.github.alexshamrai.ctrf.model.Test.TestStatus.*;
+import static io.github.alexshamrai.ctrf.model.Test.TestStatus.FAILED;
+import static io.github.alexshamrai.ctrf.model.Test.TestStatus.OTHER;
+import static io.github.alexshamrai.ctrf.model.Test.TestStatus.PASSED;
+import static io.github.alexshamrai.ctrf.model.Test.TestStatus.PENDING;
+import static io.github.alexshamrai.ctrf.model.Test.TestStatus.SKIPPED;
 
 public class CtrfExtension implements TestRunExtension, BeforeEachCallback, AfterTestExecutionCallback, TestWatcher {
 

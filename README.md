@@ -64,3 +64,11 @@ Add a `ctrf.properties` file to your resources folder if you would like to use n
 ```properties
 ctrf.report.path=build/test-results/test/ctrf-report.json
 ```
+
+## Local Project Setup
+
+### IntelliJ IDEA editor code style import
+Go to IDEA settings:
+`Settings > Editor > Code style > Java > Scheme gear button > Import Scheme`
+Import the file located in this repo using format IntelliJ IDEA code style XML:
+`config/checkstyle/intellij_idea_codestyle.xml`
