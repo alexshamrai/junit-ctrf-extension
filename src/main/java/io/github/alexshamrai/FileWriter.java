@@ -21,6 +21,7 @@ public class FileWriter {
         try {
             objectMapper.writeValue(new File(filePath), ctrfJson);
         } catch (IOException e) {
+            //TODO: add logging, consider get rid of checked exception
             throw new RuntimeException("Failed to write results to file: " + filePath, e);
         }
     }
