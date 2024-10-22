@@ -30,23 +30,7 @@ dependencies {
 }
 
 test {
-    useJUnitPlatform {
-        if (project.hasProperty("includedTags")) {
-            def includedTags = project.properties.get("includedTags").toString().split(',')
-            includedTags.each { tag ->
-                println "Including tag: $tag"
-                includeTags(tag.trim())
-            }
-        }
-
-        if (project.hasProperty("excludedTags")) {
-            def excludedTags = project.properties.get("excludedTags").toString().split(',')
-            excludedTags.each { tag ->
-                println "Excluding tag: $tag"
-                excludeTags(tag.trim())
-            }
-        }
-    }
+    useJUnitPlatform()
 }
 
 checkstyle {
