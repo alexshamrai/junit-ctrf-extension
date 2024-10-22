@@ -1,10 +1,10 @@
-package io.github.alexshamrai.functional;
+package io.github.alexshamrai.integration;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("dummy")
-public class DummySuccessTest extends BaseTest {
+public class DummySuccessTest extends BaseIntegrationTest {
 
     @Test
     void firstSuccessTest() {

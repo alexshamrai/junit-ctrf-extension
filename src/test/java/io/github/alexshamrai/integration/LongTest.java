@@ -1,8 +1,8 @@
-package io.github.alexshamrai.functional;
+package io.github.alexshamrai.integration;
 
 import org.junit.jupiter.api.Test;
 
-public class LongTest extends BaseTest {
+public class LongTest extends BaseIntegrationTest {
 
     @Test
     void oneSecondTest() throws InterruptedException {
