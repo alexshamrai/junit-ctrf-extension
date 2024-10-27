@@ -15,7 +15,7 @@ repositories {
 }
 
 ext {
-    junitVersion = '5.10.0'
+    junitVersion = '5.11.3'
     lombokVersion = '1.18.34'
     jaksonVersion = '2.18.0'
 }
@@ -34,7 +34,7 @@ test {
 }
 
 checkstyle {
-    toolVersion = '10.12.4'
+    toolVersion = '10.19.0'
     configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
 }
 
