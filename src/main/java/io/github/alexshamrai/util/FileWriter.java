@@ -1,8 +1,7 @@
-package io.github.alexshamrai;
+package io.github.alexshamrai.util;
 
 import io.github.alexshamrai.ctrf.model.CtrfJson;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.alexshamrai.util.ConfigReader;
 import lombok.RequiredArgsConstructor;
 
 import java.io.File;
