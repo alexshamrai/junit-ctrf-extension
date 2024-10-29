@@ -1,14 +1,16 @@
 package io.github.alexshamrai.jupiter;
 
-import io.github.alexshamrai.util.FileWriter;
-import io.github.alexshamrai.util.SummaryCreator;
 import io.github.alexshamrai.ctrf.model.CtrfJson;
 import io.github.alexshamrai.ctrf.model.Results;
+import io.github.alexshamrai.ctrf.model.Summary;
 import io.github.alexshamrai.ctrf.model.Test;
 import io.github.alexshamrai.ctrf.model.Tool;
 import io.github.alexshamrai.model.TestDetails;
-import io.github.alexshamrai.util.TestProcessor;
-import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
+import io.github.alexshamrai.SuiteExecutionErrorHandler;
+import io.github.alexshamrai.FileWriter;
+import io.github.alexshamrai.util.SummaryCreator;
+import io.github.alexshamrai.TestProcessor;
+import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
@@ -22,39 +24,42 @@ import static io.github.alexshamrai.ctrf.model.Test.TestStatus.PASSED;
 import static io.github.alexshamrai.ctrf.model.Test.TestStatus.SKIPPED;
 import static io.github.alexshamrai.util.TestDetailsUtil.createTestDetails;
 
-public class CtrfExtension implements TestRunExtension, BeforeEachCallback, AfterTestExecutionCallback, TestWatcher {
+public class CtrfExtension implements TestRunExtension, BeforeEachCallback, AfterEachCallback, TestWatcher {
 
     private static final List<Test> tests = new ArrayList<>();
     private static long testRunStartTime;
     private final ThreadLocal<TestDetails> testDetails = new ThreadLocal<>();
     private final FileWriter fileWriter;
-    private final SummaryCreator summaryCreator;
     private final TestProcessor testProcessor;
+    private final SuiteExecutionErrorHandler suiteExecutionErrorHandler;
 
     public CtrfExtension() {
         this.fileWriter = new FileWriter();
-        this.summaryCreator = new SummaryCreator();
         this.testProcessor = new TestProcessor();
+        this.suiteExecutionErrorHandler = new SuiteExecutionErrorHandler(testProcessor);
     }
 
     @Override
     public void beforeAllTests(ExtensionContext context) {
         testRunStartTime = System.currentTimeMillis();
+        testDetails.set(createTestDetails(context));
     }
 
     @Override
-    public void afterAllTests() {
+    public void afterAllTests(ExtensionContext context) {
         var testRunStopTime = System.currentTimeMillis();
-        var summary = summaryCreator.createSummary(tests, testRunStartTime, testRunStopTime);
 
-        var results = Results.builder()
-            .tool(Tool.builder().name("JUnit").build())
-            .summary(summary)
-            .tests(tests)
-            .build();
-        var ctrfJson = CtrfJson.builder()
-            .results(results)
-            .build();
+        if (tests.isEmpty()) {
+            suiteExecutionErrorHandler.handleInitializationError(context, testRunStartTime, testRunStopTime)
+                .ifPresent(tests::add);
+        } else if (context.getExecutionException().isPresent()) {
+            var lastTestStopTime = tests.getLast().getStop();
+            suiteExecutionErrorHandler.handleExecutionError(context, lastTestStopTime, testRunStopTime)
+                .ifPresent(tests::add);
+        }
+
+        var summary = SummaryCreator.createSummary(tests, testRunStartTime, testRunStopTime);
+        var ctrfJson = generateCtrfJson(summary);
 
         fileWriter.writeResultsToFile(ctrfJson);
     }
@@ -65,7 +70,7 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
     }
 
     @Override
-    public void afterTestExecution(ExtensionContext context) {
+    public void afterEach(ExtensionContext context) {
         long stopTime = System.currentTimeMillis();
         var details = testDetails.get();
 
@@ -107,5 +112,16 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
         return tests.stream()
             .filter(t -> t.getName().equals(context.getDisplayName()))
             .findFirst();
+    }
+
+    private static CtrfJson generateCtrfJson(Summary summary) {
+        var results = Results.builder()
+            .tool(Tool.builder().name("JUnit").build())
+            .summary(summary)
+            .tests(tests)
+            .build();
+        return CtrfJson.builder()
+            .results(results)
+            .build();
     }
 }

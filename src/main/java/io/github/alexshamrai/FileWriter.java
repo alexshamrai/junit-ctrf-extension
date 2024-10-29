@@ -1,7 +1,8 @@
-package io.github.alexshamrai.util;
+package io.github.alexshamrai;
 
 import io.github.alexshamrai.ctrf.model.CtrfJson;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.alexshamrai.util.ConfigReader;
 import lombok.RequiredArgsConstructor;
 
 import java.io.File;
@@ -20,8 +21,7 @@ public class FileWriter {
         try {
             objectMapper.writeValue(new File(filePath), ctrfJson);
         } catch (IOException e) {
-            //TODO: add logging, consider get rid of checked exception
-            throw new RuntimeException("Failed to write results to file: " + filePath, e);
+            System.err.println("Failed to write results to file: " + filePath + " - " + e.getMessage());
         }
     }
 }
