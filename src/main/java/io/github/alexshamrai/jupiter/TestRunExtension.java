@@ -12,7 +12,12 @@ public interface TestRunExtension extends BeforeAllCallback {
             .getOrComputeIfAbsent(this.getClass(),
                 k -> {
                     beforeAllTests(context);
-                    return (ExtensionContext.Store.CloseableResource) this::afterAllTests;
+                    return new ExtensionContext.Store.CloseableResource() {
+                        @Override
+                        public void close() {
+                            afterAllTests(context);
+                        }
+                    };
                 });
     }
 
@@ -20,7 +25,7 @@ public interface TestRunExtension extends BeforeAllCallback {
 
     }
 
-    default void afterAllTests() {
+    default void afterAllTests(ExtensionContext context) {
 
     }
 }

@@ -7,7 +7,7 @@ import java.util.List;
 
 public class SummaryCreator {
 
-    public Summary createSummary(List<Test> tests, long startTime, long stopTime) {
+    public static Summary createSummary(List<Test> tests, long startTime, long stopTime) {
         return Summary.builder()
             .tests(tests.size())
             .passed((int) tests.stream().filter(t -> t.getStatus() == Test.TestStatus.PASSED).count())

@@ -1,4 +1,4 @@
-package io.github.alexshamrai.util;
+package io.github.alexshamrai;
 
 import io.github.alexshamrai.ctrf.model.Test;
 import io.github.alexshamrai.model.TestDetails;
