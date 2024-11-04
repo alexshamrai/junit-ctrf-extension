@@ -1,25 +1,40 @@
 package io.github.alexshamrai;
 
-import io.github.alexshamrai.ctrf.model.CtrfJson;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.alexshamrai.util.ConfigReader;
+import io.github.alexshamrai.ctrf.model.CtrfJson;
 import lombok.RequiredArgsConstructor;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import static io.github.alexshamrai.config.ConfigReader.getReportPath;
 
 @RequiredArgsConstructor
 public class FileWriter {
 
-    private static final String DEFAULT_REPORT_PATH = "ctrf-report.json";
-    private static final String REPORT_PATH_PROPERTY = "ctrf.report.path";
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void writeResultsToFile(CtrfJson ctrfJson) {
-        String filePath = ConfigReader.getProperty(REPORT_PATH_PROPERTY, DEFAULT_REPORT_PATH);
+        var filePath = getReportPath();
+        var path = Paths.get(filePath);
         try {
-            objectMapper.writeValue(new File(filePath), ctrfJson);
+            if (path.getParent() != null) {
+                Files.createDirectories(path.getParent());
+            }
+
+            if (Files.exists(path)) {
+                System.err.println("File already exists: " + filePath);
+                return;
+            }
+
+            objectMapper.writeValue(path.toFile(), ctrfJson);
+        } catch (AccessDeniedException e) {
+            System.err.println("Access denied: " + filePath + " - " + e.getMessage());
+        } catch (FileAlreadyExistsException e) {
+            System.err.println("File already exists: " + filePath + " - " + e.getMessage());
         } catch (IOException e) {
             System.err.println("Failed to write results to file: " + filePath + " - " + e.getMessage());
         }

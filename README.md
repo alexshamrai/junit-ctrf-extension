@@ -65,6 +65,28 @@ Add a `ctrf.properties` file to your resources folder if you would like to use n
 ctrf.report.path=build/test-results/test/ctrf-report.json
 ```
 
+#### Configuration Parameters
+
+The following parameters can be configured in the `ctrf.properties` file:
+
+- `ctrf.report.path`: The path where the CTRF report will be saved. Default is `ctrf-report.json`.
+- `ctrf.max.message.length`: The maximum length of messages in the report. Default is `500`.
+- `junit.version`: The version of JUnit being used.
+- `ctrf.report.name`: The name of the CTRF report.
+- `ctrf.app.name`: The name of the application.
+- `ctrf.app.version`: The version of the application.
+- `ctrf.build.name`: The name of the build.
+- `ctrf.build.number`: The number of the build.
+- `ctrf.build.url`: The URL of the build.
+- `ctrf.repository.name`: The name of the repository.
+- `ctrf.repository.url`: The URL of the repository.
+- `ctrf.commit`: The commit hash.
+- `ctrf.branch.name`: The name of the branch.
+- `ctrf.os.platform`: The operating system platform.
+- `ctrf.os.release`: The release version of the operating system.
+- `ctrf.os.version`: The version of the operating system.
+- `ctrf.test.environment`: The test environment.
+
 ## Local Project Setup
 
 ### IntelliJ IDEA editor code style import
