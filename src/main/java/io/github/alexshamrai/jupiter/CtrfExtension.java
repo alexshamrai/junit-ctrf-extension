@@ -1,14 +1,11 @@
 package io.github.alexshamrai.jupiter;
 
-import io.github.alexshamrai.ctrf.model.CtrfJson;
-import io.github.alexshamrai.ctrf.model.Results;
-import io.github.alexshamrai.ctrf.model.Summary;
+import io.github.alexshamrai.CtrfJsonComposer;
 import io.github.alexshamrai.ctrf.model.Test;
-import io.github.alexshamrai.ctrf.model.Tool;
 import io.github.alexshamrai.model.TestDetails;
 import io.github.alexshamrai.SuiteExecutionErrorHandler;
 import io.github.alexshamrai.FileWriter;
-import io.github.alexshamrai.util.SummaryCreator;
+import io.github.alexshamrai.util.SummaryUtil;
 import io.github.alexshamrai.TestProcessor;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -58,8 +55,8 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
                 .ifPresent(tests::add);
         }
 
-        var summary = SummaryCreator.createSummary(tests, testRunStartTime, testRunStopTime);
-        var ctrfJson = generateCtrfJson(summary);
+        var summary = SummaryUtil.createSummary(tests, testRunStartTime, testRunStopTime);
+        var ctrfJson = CtrfJsonComposer.generateCtrfJson(summary, tests);
 
         fileWriter.writeResultsToFile(ctrfJson);
     }
@@ -112,16 +109,5 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
         return tests.stream()
             .filter(t -> t.getName().equals(context.getDisplayName()))
             .findFirst();
-    }
-
-    private static CtrfJson generateCtrfJson(Summary summary) {
-        var results = Results.builder()
-            .tool(Tool.builder().name("JUnit").build())
-            .summary(summary)
-            .tests(tests)
-            .build();
-        return CtrfJson.builder()
-            .results(results)
-            .build();
     }
 }

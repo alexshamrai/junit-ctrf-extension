@@ -8,16 +8,17 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 
+import static io.github.alexshamrai.config.ConfigReader.getMaxMessageLength;
+
 public class TestProcessor {
 
-    private static final int MAX_MESSAGE_LENGTH = 1000;
+    private static final int MAX_MESSAGE_LENGTH = getMaxMessageLength();
 
     public void setFailureDetails(Test test, Throwable cause) {
-        StringWriter sw = new StringWriter();
-        cause.printStackTrace(new PrintWriter(sw));
-        String trace = sw.toString();
-        String message = trace.length() > MAX_MESSAGE_LENGTH ? trace.substring(0, MAX_MESSAGE_LENGTH) : trace;
-
+        var stringWriter = new StringWriter();
+        cause.printStackTrace(new PrintWriter(stringWriter));
+        var trace = stringWriter.toString();
+        var message = trace.length() > MAX_MESSAGE_LENGTH ? trace.substring(0, MAX_MESSAGE_LENGTH) + "..." : trace;
         test.setMessage(message);
         test.setTrace(trace);
     }

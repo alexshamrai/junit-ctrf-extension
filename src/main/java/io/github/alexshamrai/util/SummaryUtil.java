@@ -5,7 +5,7 @@ import io.github.alexshamrai.ctrf.model.Test;
 
 import java.util.List;
 
-public class SummaryCreator {
+public class SummaryUtil {
 
     public static Summary createSummary(List<Test> tests, long startTime, long stopTime) {
         return Summary.builder()
