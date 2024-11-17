@@ -1,24 +1,26 @@
 package io.github.alexshamrai;
 
+import io.github.alexshamrai.config.ConfigReader;
 import io.github.alexshamrai.ctrf.model.Test;
 import io.github.alexshamrai.model.TestDetails;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 
-import static io.github.alexshamrai.config.ConfigReader.getMaxMessageLength;
-
+@RequiredArgsConstructor
 public class TestProcessor {
 
-    private static final int MAX_MESSAGE_LENGTH = getMaxMessageLength();
+    private final ConfigReader configReader;
 
     public void setFailureDetails(Test test, Throwable cause) {
+        int maxMessageLength = configReader.getMaxMessageLength();
         var stringWriter = new StringWriter();
         cause.printStackTrace(new PrintWriter(stringWriter));
         var trace = stringWriter.toString();
-        var message = trace.length() > MAX_MESSAGE_LENGTH ? trace.substring(0, MAX_MESSAGE_LENGTH) + "..." : trace;
+        var message = trace.length() > maxMessageLength ? trace.substring(0, maxMessageLength) + "..." : trace;
         test.setMessage(message);
         test.setTrace(trace);
     }

@@ -4,6 +4,7 @@ import io.github.alexshamrai.CtrfJsonComposer;
 import io.github.alexshamrai.FileWriter;
 import io.github.alexshamrai.SuiteExecutionErrorHandler;
 import io.github.alexshamrai.TestProcessor;
+import io.github.alexshamrai.config.ConfigReader;
 import io.github.alexshamrai.ctrf.model.Test;
 import io.github.alexshamrai.model.TestDetails;
 import io.github.alexshamrai.util.SummaryUtil;
@@ -29,11 +30,14 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
     private final FileWriter fileWriter;
     private final TestProcessor testProcessor;
     private final SuiteExecutionErrorHandler suiteExecutionErrorHandler;
+    private final CtrfJsonComposer ctrfJsonComposer;
 
     public CtrfExtension() {
-        this.fileWriter = new FileWriter();
-        this.testProcessor = new TestProcessor();
+        var configReader = new ConfigReader();
+        this.fileWriter = new FileWriter(configReader);
+        this.testProcessor = new TestProcessor(configReader);
         this.suiteExecutionErrorHandler = new SuiteExecutionErrorHandler(testProcessor);
+        this.ctrfJsonComposer = new CtrfJsonComposer(configReader);
     }
 
     @Override
@@ -50,13 +54,13 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
             suiteExecutionErrorHandler.handleInitializationError(context, testRunStartTime, testRunStopTime)
                 .ifPresent(tests::add);
         } else if (context.getExecutionException().isPresent()) {
-            var lastTestStopTime = tests.getLast().getStop();
+            var lastTestStopTime = tests.get(tests.size() - 1).getStop();
             suiteExecutionErrorHandler.handleExecutionError(context, lastTestStopTime, testRunStopTime)
                 .ifPresent(tests::add);
         }
 
         var summary = SummaryUtil.createSummary(tests, testRunStartTime, testRunStopTime);
-        var ctrfJson = CtrfJsonComposer.generateCtrfJson(summary, tests);
+        var ctrfJson = ctrfJsonComposer.generateCtrfJson(summary, tests);
 
         fileWriter.writeResultsToFile(ctrfJson);
     }
