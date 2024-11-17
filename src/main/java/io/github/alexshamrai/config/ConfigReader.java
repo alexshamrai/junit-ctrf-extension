@@ -2,75 +2,95 @@ package io.github.alexshamrai.config;
 
 import org.aeonbits.owner.ConfigFactory;
 
+/**
+ * A reader for configuration properties defined in the {@link CtrfConfig} interface.
+ */
 public class ConfigReader {
 
-    private static final CtrfConfig config = ConfigFactory.create(CtrfConfig.class);
+    private final CtrfConfig config;
 
-    public static String getReportPath() {
+    /**
+     * Creates a new {@code ConfigReader} with the configuration in ctrf.properties.
+     */
+    public ConfigReader() {
+        this.config = ConfigFactory.create(CtrfConfig.class);
+    }
+
+    /**
+     * Creates a new {@code ConfigReader} with the specified configuration.
+     * This constructor is primarily used for testing purposes.
+     *
+     * @param config the configuration to use
+     */
+    public ConfigReader(CtrfConfig config) {
+        this.config = config;
+    }
+
+    public String getReportPath() {
         return config.reportPath();
     }
 
-    public static int getMaxMessageLength() {
+    public int getMaxMessageLength() {
         return config.maxMessageLength();
     }
 
-    public static String getJUnitVersion() {
+    public String getJUnitVersion() {
         return config.junitVersion();
     }
 
-    public static String getReportName() {
+    public String getReportName() {
         return config.reportName();
     }
 
-    public static String getAppName() {
+    public String getAppName() {
         return config.appName();
     }
 
-    public static String getAppVersion() {
+    public String getAppVersion() {
         return config.appVersion();
     }
 
-    public static String getBuildName() {
+    public String getBuildName() {
         return config.buildName();
     }
 
-    public static String getBuildNumber() {
+    public String getBuildNumber() {
         return config.buildNumber();
     }
 
-    public static String getBuildUrl() {
+    public String getBuildUrl() {
         return config.buildUrl();
     }
 
-    public static String getRepositoryName() {
+    public String getRepositoryName() {
         return config.repositoryName();
     }
 
-    public static String getRepositoryUrl() {
+    public String getRepositoryUrl() {
         return config.repositoryUrl();
     }
 
-    public static String getCommit() {
+    public String getCommit() {
         return config.commit();
     }
 
-    public static String getBranchName() {
+    public String getBranchName() {
         return config.branchName();
     }
 
-    public static String getOsPlatform() {
+    public String getOsPlatform() {
         return config.osPlatform();
     }
 
-    public static String getOsRelease() {
+    public String getOsRelease() {
         return config.osRelease();
     }
 
-    public static String getOsVersion() {
+    public String getOsVersion() {
         return config.osVersion();
     }
 
-    public static String getTestEnvironment() {
+    public String getTestEnvironment() {
         return config.testEnvironment();
     }
 }
