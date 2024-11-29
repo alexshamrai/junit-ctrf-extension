@@ -1,20 +1,20 @@
 package io.github.alexshamrai.jupiter;
 
 import io.github.alexshamrai.CtrfJsonComposer;
+import io.github.alexshamrai.FileWriter;
+import io.github.alexshamrai.SuiteExecutionErrorHandler;
+import io.github.alexshamrai.TestProcessor;
 import io.github.alexshamrai.ctrf.model.Test;
 import io.github.alexshamrai.model.TestDetails;
-import io.github.alexshamrai.SuiteExecutionErrorHandler;
-import io.github.alexshamrai.FileWriter;
 import io.github.alexshamrai.util.SummaryUtil;
-import io.github.alexshamrai.TestProcessor;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static io.github.alexshamrai.ctrf.model.Test.TestStatus.FAILED;
 import static io.github.alexshamrai.ctrf.model.Test.TestStatus.PASSED;
@@ -23,7 +23,7 @@ import static io.github.alexshamrai.util.TestDetailsUtil.createTestDetails;
 
 public class CtrfExtension implements TestRunExtension, BeforeEachCallback, AfterEachCallback, TestWatcher {
 
-    private static final List<Test> tests = new ArrayList<>();
+    private static final List<Test> tests = new CopyOnWriteArrayList<>();
     private static long testRunStartTime;
     private final ThreadLocal<TestDetails> testDetails = new ThreadLocal<>();
     private final FileWriter fileWriter;
