@@ -2,6 +2,11 @@ name: Check CTRF
 
 on:
   workflow_dispatch:
+    inputs:
+      threads:
+        description: 'Threads'
+        default: '2'
+        required: false
 
 jobs:
   build:
@@ -22,7 +27,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run integration tests
-        run: ./gradlew :integration-tests:test
+        run: ./gradlew :integration-tests:test -Dthreads=${{ github.event.inputs.threads }}
 
       - name: Run CTRF annotations
         run: npx github-actions-ctrf integration-tests/build/test-results/test/ctrf-report.json
