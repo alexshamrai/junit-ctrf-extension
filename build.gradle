@@ -17,7 +17,7 @@ repositories {
 ext {
     junitVersion = '5.11.3'
     lombokVersion = '1.18.36'
-    jaksonVersion = '2.18.1'
+    jaksonVersion = '2.18.2'
     ownerVersion = '1.0.12'
 }
 
