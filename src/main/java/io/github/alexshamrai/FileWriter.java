@@ -27,7 +27,6 @@ public class FileWriter {
 
             if (Files.exists(path)) {
                 System.err.println("File already exists: " + filePath);
-                return;
             }
 
             objectMapper.writeValue(path.toFile(), ctrfJson);
