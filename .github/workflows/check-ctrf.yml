@@ -29,8 +29,10 @@ jobs:
       - name: Run integration tests
         run: ./gradlew :integration-tests:test -Dthreads=${{ github.event.inputs.threads }}
 
-      - name: Run CTRF annotations
-        run: npx github-actions-ctrf integration-tests/build/test-results/test/ctrf-report.json
+      - name: Publish CTRF Test Report
+        uses: ctrf-io/github-test-reporter@v1
+        with:
+          report-path: 'integration-tests/build/test-results/test/ctrf-report.json'
         if: always()
 
       - name: Upload test results
