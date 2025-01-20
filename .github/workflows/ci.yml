@@ -29,6 +29,8 @@ jobs:
       - name: Run unit tests
         run: ./gradlew test -x :integration-tests:test
 
-      - name: Run CTRF annotations
-        run: npx github-actions-ctrf build/test-results/test/ctrf-report.json
+      - name: Publish CTRF Test Report
+        uses: ctrf-io/github-test-reporter@v1
+        with:
+          report-path: 'build/test-results/test/ctrf-report.json'
         if: always()
