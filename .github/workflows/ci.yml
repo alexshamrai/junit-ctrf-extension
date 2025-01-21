@@ -30,7 +30,7 @@ jobs:
         run: ./gradlew test -x :integration-tests:test
 
       - name: Publish CTRF Test Report
-        uses: ctrf-io/github-test-reporter@v1
+        uses: ctrf-io/github-test-reporter@v1.0.3
         with:
           report-path: 'build/test-results/test/ctrf-report.json'
         if: always()
