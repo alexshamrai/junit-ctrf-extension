@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'io.github.alexshamrai'
-version = '0.2.1'
+version = '0.3.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -19,6 +19,7 @@ ext {
     lombokVersion = '1.18.36'
     jaksonVersion = '2.18.2'
     ownerVersion = '1.0.12'
+    mockitoVersion = '5.15.2'
 }
 
 dependencies {
@@ -29,6 +30,7 @@ dependencies {
     implementation "org.aeonbits.owner:owner:${ownerVersion}"
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
 }
 
 test {
