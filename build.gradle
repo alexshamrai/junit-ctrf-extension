@@ -16,10 +16,10 @@ repositories {
 
 ext {
     junitVersion = '5.11.3'
-    lombokVersion = '1.18.36'
-    jaksonVersion = '2.18.2'
+    lombokVersion = '1.18.38'
+    jaksonVersion = '2.18.3'
     ownerVersion = '1.0.12'
-    mockitoVersion = '5.15.2'
+    mockitoVersion = '5.17.0'
     assertjVersion = '3.27.3'
 }
 
@@ -40,7 +40,7 @@ test {
 }
 
 checkstyle {
-    toolVersion = '10.21.0'
+    toolVersion = '10.23.0'
     configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
 }
 
