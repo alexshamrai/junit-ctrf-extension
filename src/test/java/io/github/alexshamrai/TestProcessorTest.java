@@ -91,4 +91,27 @@ public class TestProcessorTest extends BaseTest {
         assertEquals(stopTime, result.getStop());
         assertEquals(1000, result.getDuration());
     }
+
+    @org.junit.jupiter.api.Test
+    void createTest_setsThreadIdInExtra() {
+        var displayName = "Test Display Name";
+        var tags = new HashSet<>(Arrays.asList("tag1", "tag2"));
+        var filePath = "path/to/test/file.java";
+        var startTime = System.currentTimeMillis();
+        var stopTime = startTime + 1000;
+
+        var details = TestDetails.builder()
+            .tags(tags)
+            .filePath(filePath)
+            .startTime(startTime)
+            .build();
+
+        when(extensionContext.getDisplayName()).thenReturn(displayName);
+
+        var result = testProcessor.createTest(extensionContext, details, stopTime);
+
+        assertNotNull(result.getExtra());
+        assertNotNull(result.getExtra().getThreadId());
+        assertEquals(Thread.currentThread().getName(), result.getExtra().getThreadId());
+    }
 }

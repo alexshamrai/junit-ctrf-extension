@@ -16,4 +16,5 @@ import java.util.Map;
 public class Extra {
 
     private Map<String, Object> customData;
+    private String threadId;
 }

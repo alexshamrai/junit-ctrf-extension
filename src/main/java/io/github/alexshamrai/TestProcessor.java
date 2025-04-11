@@ -1,6 +1,7 @@
 package io.github.alexshamrai;
 
 import io.github.alexshamrai.config.ConfigReader;
+import io.github.alexshamrai.ctrf.model.Extra;
 import io.github.alexshamrai.ctrf.model.Test;
 import io.github.alexshamrai.model.TestDetails;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,13 @@ public class TestProcessor {
             .start(details.getStartTime())
             .stop(stopTime)
             .duration(stopTime - details.getStartTime())
+            .extra(createExtraWithThreadId())
+            .build();
+    }
+
+    private Extra createExtraWithThreadId() {
+        return Extra.builder()
+            .threadId(Thread.currentThread().getName())
             .build();
     }
 }
