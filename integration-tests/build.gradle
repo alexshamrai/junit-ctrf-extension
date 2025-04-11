@@ -21,13 +21,24 @@ test {
     def threads = System.getProperty("threads")
     println "Configured number of threads: ${threads ?: 'not set'}"
 
-    if (threads != null && threads.toInteger() > 1) {
-        systemProperties += [
-                'junit.jupiter.execution.parallel.enabled'                 : true,
-                'junit.jupiter.execution.parallel.mode.default'            : 'concurrent',
-                'junit.jupiter.execution.parallel.mode.classes.default'    : 'concurrent',
-                'junit.jupiter.execution.parallel.config.strategy'         : 'fixed',
-                'junit.jupiter.execution.parallel.config.fixed.parallelism': threads.toInteger()
-        ]
+    if (threads?.isInteger()) {
+        def threadsNumber = threads.toInteger()
+        if (threadsNumber > 1) {
+            systemProperties += [
+                    'junit.jupiter.execution.parallel.enabled'                   : true,
+                    'junit.jupiter.execution.parallel.mode.default'              : 'concurrent',
+                    'junit.jupiter.execution.parallel.mode.classes.default'      : 'concurrent',
+                    'junit.jupiter.execution.parallel.config.strategy'           : 'fixed',
+                    'junit.jupiter.execution.parallel.config.fixed.parallelism'  : threadsNumber,
+                    'junit.jupiter.execution.parallel.config.fixed.max-pool-size': threadsNumber
+            ]
+        }
+    } else {
+        println "Invalid or missing 'threads' property. Default settings will be used."
+    }
+
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
     }
 }
