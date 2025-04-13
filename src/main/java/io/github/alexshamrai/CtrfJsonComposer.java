@@ -11,12 +11,26 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+/**
+ * Composes the final CTRF JSON object from test results and configuration.
+ * <p>
+ * This class is responsible for creating the complete CTRF JSON structure according
+ * to the CTRF standard, including tool information, test environment details,
+ * and test results.
+ */
 @RequiredArgsConstructor
 public class CtrfJsonComposer {
 
     private static final String TOOL_NAME = "JUnit";
     private final ConfigReader configReader;
 
+    /**
+     * Generates a complete CTRF JSON object containing test results and metadata.
+     *
+     * @param summary the test execution summary
+     * @param tests the list of test results
+     * @return a complete CTRF JSON object ready for serialization
+     */
     public CtrfJson generateCtrfJson(Summary summary, List<Test> tests) {
         var results = Results.builder()
             .tool(composeTool())
@@ -29,6 +43,11 @@ public class CtrfJsonComposer {
             .build();
     }
 
+    /**
+     * Creates the tool section of the CTRF JSON, which identifies JUnit as the test tool.
+     *
+     * @return a Tool object containing JUnit information
+     */
     private Tool composeTool() {
         var toolBuilder = Tool.builder()
             .name(TOOL_NAME)
@@ -37,6 +56,12 @@ public class CtrfJsonComposer {
         return toolBuilder.build();
     }
 
+    /**
+     * Creates the environment section of the CTRF JSON, including details about
+     * the application, build, repository, operating system, and test environment.
+     *
+     * @return an Environment object containing all available environment information
+     */
     private Environment composeEnvironment() {
         return Environment.builder()
             .reportName(configReader.getReportName())

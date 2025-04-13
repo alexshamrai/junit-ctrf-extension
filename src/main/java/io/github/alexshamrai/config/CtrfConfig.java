@@ -3,6 +3,14 @@ package io.github.alexshamrai.config;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Sources;
 
+/**
+ * Configuration interface for CTRF Extension settings.
+ * <p>
+ * This interface defines all configurable properties for the CTRF Extension.
+ * Values will be loaded from a {@code ctrf.properties} file in the classpath.
+ * <p>
+ * Each property has a default value or can be left undefined if optional.
+ */
 @Sources("classpath:ctrf.properties")
 public interface CtrfConfig extends Config {
 
