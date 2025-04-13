@@ -11,12 +11,27 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/**
+ * Handles writing the CTRF JSON report to a file on the filesystem.
+ * <p>
+ * This class takes care of creating necessary directories, handling file system errors,
+ * and serializing the CTRF JSON object to a file. The target file path is determined
+ * by the configuration provided through {@link ConfigReader}.
+ */
 @RequiredArgsConstructor
 public class FileWriter {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ConfigReader configReader;
 
+    /**
+     * Writes the provided CTRF JSON object to a file.
+     * <p>
+     * The method handles directory creation if needed and logs errors to the standard error
+     * if any issues occur during file writing.
+     *
+     * @param ctrfJson the CTRF JSON object to write to file
+     */
     public void writeResultsToFile(CtrfJson ctrfJson) {
         var filePath = configReader.getReportPath();
         var path = Paths.get(filePath);

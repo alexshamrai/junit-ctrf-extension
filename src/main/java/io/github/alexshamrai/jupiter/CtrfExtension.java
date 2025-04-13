@@ -22,6 +22,25 @@ import static io.github.alexshamrai.ctrf.model.Test.TestStatus.PASSED;
 import static io.github.alexshamrai.ctrf.model.Test.TestStatus.SKIPPED;
 import static io.github.alexshamrai.util.TestDetailsUtil.createTestDetails;
 
+/**
+ * JUnit 5 extension that generates test reports in the CTRF (Common Test Report Format) format.
+ * <p>
+ * This extension tracks test execution, captures test results, and generates a JSON report
+ * following the CTRF standard. It handles test statuses, and captures relevant test metadata.
+ * <p>
+ * To use this extension, simply add it to your test class using the {@code @ExtendWith} annotation:
+ * <pre>
+ * {@code
+ * @ExtendWith(CtrfExtension.class)
+ * public class MyTest {
+ *     // test methods
+ * }
+ * }
+ * </pre>
+ * <p>
+ * The extension can be configured through a {@code ctrf.properties} file placed in the classpath.
+ * See the README for all available configuration options.
+ */
 public class CtrfExtension implements TestRunExtension, BeforeEachCallback, AfterEachCallback, TestWatcher {
 
     private static final List<Test> tests = new CopyOnWriteArrayList<>();
