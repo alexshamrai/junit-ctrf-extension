@@ -28,7 +28,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.github.alexshamrai:junit-ctrf-extension:0.2.0'
+    implementation 'io.github.alexshamrai:junit-ctrf-extension:0.3.0'
 }
 ```
 

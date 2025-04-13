@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'io.github.alexshamrai'
-version = '0.3.0-SNAPSHOT'
+version = '0.3.0'
 
 repositories {
     mavenCentral()
@@ -47,7 +47,7 @@ checkstyle {
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
-    coordinates("io.github.alexshamrai", "junit-ctrf-extension", "0.2.1")
+    coordinates("io.github.alexshamrai", "junit-ctrf-extension", "0.3.0")
     pom {
         name = "Junit CTRF Extension"
         description = "Junit extension to create test reports that follow the CTRF standard."
