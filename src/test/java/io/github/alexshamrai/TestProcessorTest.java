@@ -93,7 +93,7 @@ public class TestProcessorTest extends BaseTest {
     }
 
     @org.junit.jupiter.api.Test
-    void createTest_setsThreadIdInExtra() {
+    void createTest_setsThreadId() {
         var displayName = "Test Display Name";
         var tags = new HashSet<>(Arrays.asList("tag1", "tag2"));
         var filePath = "path/to/test/file.java";
@@ -110,8 +110,7 @@ public class TestProcessorTest extends BaseTest {
 
         var result = testProcessor.createTest(extensionContext, details, stopTime);
 
-        assertNotNull(result.getExtra());
-        assertNotNull(result.getExtra().getThreadId());
-        assertEquals(Thread.currentThread().getName(), result.getExtra().getThreadId());
+        assertNotNull(result.getThreadId());
+        assertEquals(Thread.currentThread().getName(), result.getThreadId());
     }
 }
