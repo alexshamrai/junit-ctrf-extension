@@ -8,9 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-/**
- * Service class for file operations.
- */
 public class FileSteps {
     private static final Logger log = LoggerFactory.getLogger(FileSteps.class);
 
@@ -46,15 +43,5 @@ public class FileSteps {
         String content = Files.readString(path);
         log.debug("File content read from: {}", path.toAbsolutePath());
         return content;
-    }
-
-    /**
-     * Gets the Path object for a file path.
-     *
-     * @param filePath the file path as a string
-     * @return the Path object
-     */
-    public Path getPath(String filePath) {
-        return Paths.get(filePath);
     }
 }

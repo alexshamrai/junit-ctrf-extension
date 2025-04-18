@@ -38,17 +38,12 @@ public class CtrfReportValidationTest {
 
     @BeforeAll
     void setup() {
-        // Load the CTRF report JSON
-        boolean loaded = testReportSteps.loadReport(REPORT_PATH);
-        if (loaded) {
-            // Get the test status map
-            testStatusMap = testReportSteps.getTestStatusMap();
-        }
+        testReportSteps.loadReport(REPORT_PATH);
+        testStatusMap = testReportSteps.getTestStatusMap();
     }
 
     @Test
     void validateSchemaCompliance() throws IOException {
-        assumeReportExists();
 
         // Validate the report against the schema
         Set<ValidationMessage> validationResult = testReportSteps.validateAgainstSchema(SCHEMA_PATH);
@@ -86,7 +81,6 @@ public class CtrfReportValidationTest {
 
     @Test
     void verifyDummyDisabledTestsAreSkipped() {
-        assumeReportExists();
 
         // Skip this test if DummyDisabledTest tests are not in the report
         boolean hasDummyDisabledTests = testStatusMap.keySet().stream().anyMatch(k -> k.contains("DummyDisabledTest"));
@@ -117,7 +111,6 @@ public class CtrfReportValidationTest {
 
     @Test
     void verifyDummyFailedTestsAreFailed() {
-        assumeReportExists();
 
         // Skip this test if DummyFailedTest tests are not in the report
         boolean hasDummyFailedTests = testStatusMap.keySet().stream().anyMatch(k -> k.contains("DummyFailedTest"));
@@ -148,7 +141,6 @@ public class CtrfReportValidationTest {
 
     @Test
     void verifyDummySuccessTestsArePassed() {
-        assumeReportExists();
 
         // Skip this test if DummySuccessTest tests are not in the report
         if (!testStatusMap.keySet().stream().anyMatch(k -> k.contains("DummySuccessTest"))) {
@@ -177,21 +169,9 @@ public class CtrfReportValidationTest {
 
     @Test
     void verifySummaryIsCorrect() {
-        assumeReportExists();
         assertThat(testReportSteps.verifySummary())
             .as("Summary should be correct")
             .isTrue();
     }
 
-    private void assumeReportExists() {
-        if (!testReportSteps.reportExists()) {
-            Assumptions.assumeTrue(false, "CTRF report not loaded or invalid. Make sure it exists at: " + REPORT_PATH);
-            return;
-        }
-
-        if (testStatusMap == null || testStatusMap.isEmpty()) {
-            Assumptions.assumeTrue(false, "No test statuses found in the CTRF report");
-            return;
-        }
-    }
 }
