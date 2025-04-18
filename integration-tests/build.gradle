@@ -23,6 +23,9 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.junit.platform:junit-platform-launcher'
     testImplementation project(':')
+
+    // AssertJ for fluent assertions
+    testImplementation 'org.assertj:assertj-core:3.25.3'
 }
 
 test {

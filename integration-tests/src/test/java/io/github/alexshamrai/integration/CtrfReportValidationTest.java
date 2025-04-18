@@ -16,13 +16,11 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CtrfReportValidationTest {
-
     private static final Logger log = LoggerFactory.getLogger(CtrfReportValidationTest.class);
     private static final String SCHEMA_PATH = "src/test/resources/schema/ctrf-schema.json";
     private static final String REPORT_PATH = "build/test-results/test/ctrf-report.json";
@@ -75,16 +73,21 @@ public class CtrfReportValidationTest {
         }
 
         // Additional validation to ensure the report has the expected structure
-        assertTrue(reportService.verifyReportStructure(reportJson), "CTRF report should have the expected structure");
+        assertThat(reportService.verifyReportStructure(reportJson))
+            .as("CTRF report should have the expected structure")
+            .isTrue();
 
         // Check for new required fields if they exist
         if (reportJson.has("reportFormat")) {
-            assertEquals("CTRF", reportJson.getString("reportFormat"), "reportFormat should be 'CTRF'");
+            assertThat(reportJson.getString("reportFormat"))
+                .as("reportFormat should be 'CTRF'")
+                .isEqualTo("CTRF");
         }
 
         if (reportJson.has("specVersion")) {
-            assertTrue(reportJson.getString("specVersion").matches("^[0-9]+\\.[0-9]+\\.[0-9]+$"), 
-                    "specVersion should match the pattern ^[0-9]+\\.[0-9]+\\.[0-9]+$");
+            assertThat(reportJson.getString("specVersion").matches("^[0-9]+\\.[0-9]+\\.[0-9]+$"))
+                .as("specVersion should match the pattern ^[0-9]+\\.[0-9]+\\.[0-9]+$")
+                .isTrue();
         }
     }
 
@@ -111,19 +114,17 @@ public class CtrfReportValidationTest {
                 String status = testStatusMap.get(key);
                 log.debug("First disabled test status: {}", status);
                 // In the new schema, disabled tests could be reported as "skipped", "pending", or "other"
-                assertTrue(
-                    status.equals("skipped") || status.equals("pending") || status.equals("other"),
-                    "First disabled test should be skipped, pending, or other, but was: " + status
-                );
+                assertThat(status.equals("skipped") || status.equals("pending") || status.equals("other"))
+                    .as("First disabled test should be skipped, pending, or other, but was: " + status)
+                    .isTrue();
             }
             if (key.contains("DummyDisabledTest") && key.contains("secondDisabled")) {
                 String status = testStatusMap.get(key);
                 log.debug("Second disabled test status: {}", status);
                 // In the new schema, disabled tests could be reported as "skipped", "pending", or "other"
-                assertTrue(
-                    status.equals("skipped") || status.equals("pending") || status.equals("other"),
-                    "Second disabled test should be skipped, pending, or other, but was: " + status
-                );
+                assertThat(status.equals("skipped") || status.equals("pending") || status.equals("other"))
+                    .as("Second disabled test should be skipped, pending, or other, but was: " + status)
+                    .isTrue();
             }
         }
     }
@@ -151,13 +152,17 @@ public class CtrfReportValidationTest {
                 String status = testStatusMap.get(key);
                 log.debug("First failed test status: {}", status);
                 // In the new schema, failed tests should still be reported as "failed"
-                assertEquals("failed", status, "First failed test should be failed");
+                assertThat(status)
+                    .as("First failed test should be failed")
+                    .isEqualTo("failed");
             }
             if (key.contains("DummyFailedTest") && (key.contains("secondFailed") || key.contains("Second failed"))) {
                 String status = testStatusMap.get(key);
                 log.debug("Second failed test status: {}", status);
                 // In the new schema, failed tests should still be reported as "failed"
-                assertEquals("failed", status, "Second failed test should be failed");
+                assertThat(status)
+                    .as("Second failed test should be failed")
+                    .isEqualTo("failed");
             }
         }
     }
@@ -179,13 +184,17 @@ public class CtrfReportValidationTest {
                 String status = testStatusMap.get(key);
                 log.debug("First success test status: {}", status);
                 // In the new schema, successful tests should still be reported as "passed"
-                assertEquals("passed", status, "First success test should be passed");
+                assertThat(status)
+                    .as("First success test should be passed")
+                    .isEqualTo("passed");
             }
             if (key.contains("DummySuccessTest") && key.contains("secondSuccess")) {
                 String status = testStatusMap.get(key);
                 log.debug("Second success test status: {}", status);
                 // In the new schema, successful tests should still be reported as "passed"
-                assertEquals("passed", status, "Second success test should be passed");
+                assertThat(status)
+                    .as("Second success test should be passed")
+                    .isEqualTo("passed");
             }
         }
     }
@@ -193,7 +202,9 @@ public class CtrfReportValidationTest {
     @Test
     void verifySummaryIsCorrect() {
         assumeReportExists();
-        assertTrue(reportService.verifySummary(reportJson), "Summary should be correct");
+        assertThat(reportService.verifySummary(reportJson))
+            .as("Summary should be correct")
+            .isTrue();
     }
 
     private void assumeReportExists() {
