@@ -9,8 +9,6 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
@@ -21,7 +19,6 @@ import static org.assertj.core.api.Assertions.fail;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CtrfReportValidationTest {
-    private static final Logger log = LoggerFactory.getLogger(CtrfReportValidationTest.class);
     private static final String SCHEMA_PATH = "src/test/resources/schema/ctrf-schema.json";
     private static final String REPORT_PATH = "build/test-results/test/ctrf-report.json";
 
@@ -46,9 +43,6 @@ public class CtrfReportValidationTest {
         if (loaded) {
             // Get the test status map
             testStatusMap = testReportSteps.getTestStatusMap();
-            log.info("Loaded CTRF report with {} test statuses", testStatusMap.size());
-        } else {
-            log.warn("Failed to load CTRF report from {}", REPORT_PATH);
         }
     }
 
@@ -68,8 +62,6 @@ public class CtrfReportValidationTest {
 
             if (!isMissingNewRequiredFields) {
                 fail("CTRF report does not comply with the schema");
-            } else {
-                log.info("Validation failed due to missing new required fields. This is expected if the CTRF report generator hasn't been updated yet.");
             }
         }
 
@@ -96,15 +88,10 @@ public class CtrfReportValidationTest {
     void verifyDummyDisabledTestsAreSkipped() {
         assumeReportExists();
 
-        // Log all test keys for debugging
-        System.out.println("[DEBUG_LOG] Available test keys: " + testStatusMap.keySet());
-
         // Skip this test if DummyDisabledTest tests are not in the report
         boolean hasDummyDisabledTests = testStatusMap.keySet().stream().anyMatch(k -> k.contains("DummyDisabledTest"));
-        System.out.println("[DEBUG_LOG] Has DummyDisabledTest tests: " + hasDummyDisabledTests);
-
+        
         if (!hasDummyDisabledTests) {
-            System.out.println("[DEBUG_LOG] Skipping verifyDummyDisabledTestsAreSkipped because DummyDisabledTest tests are not in the report");
             // This test is not applicable if there are no DummyDisabledTest tests in the report
             return;
         }
@@ -113,7 +100,6 @@ public class CtrfReportValidationTest {
         for (String key : testStatusMap.keySet()) {
             if (key.contains("DummyDisabledTest") && key.contains("firstDisabled")) {
                 String status = testStatusMap.get(key);
-                log.debug("First disabled test status: {}", status);
                 // In the new schema, disabled tests could be reported as "skipped", "pending", or "other"
                 assertThat(status.equals("skipped") || status.equals("pending") || status.equals("other"))
                     .as("First disabled test should be skipped, pending, or other, but was: " + status)
@@ -121,7 +107,6 @@ public class CtrfReportValidationTest {
             }
             if (key.contains("DummyDisabledTest") && key.contains("secondDisabled")) {
                 String status = testStatusMap.get(key);
-                log.debug("Second disabled test status: {}", status);
                 // In the new schema, disabled tests could be reported as "skipped", "pending", or "other"
                 assertThat(status.equals("skipped") || status.equals("pending") || status.equals("other"))
                     .as("Second disabled test should be skipped, pending, or other, but was: " + status)
@@ -134,15 +119,10 @@ public class CtrfReportValidationTest {
     void verifyDummyFailedTestsAreFailed() {
         assumeReportExists();
 
-        // Log all test keys for debugging
-        System.out.println("[DEBUG_LOG] Available test keys: " + testStatusMap.keySet());
-
         // Skip this test if DummyFailedTest tests are not in the report
         boolean hasDummyFailedTests = testStatusMap.keySet().stream().anyMatch(k -> k.contains("DummyFailedTest"));
-        System.out.println("[DEBUG_LOG] Has DummyFailedTest tests: " + hasDummyFailedTests);
-
+        
         if (!hasDummyFailedTests) {
-            System.out.println("[DEBUG_LOG] Skipping verifyDummyFailedTestsAreFailed because DummyFailedTest tests are not in the report");
             // This test is not applicable if there are no DummyFailedTest tests in the report
             return;
         }
@@ -151,7 +131,6 @@ public class CtrfReportValidationTest {
         for (String key : testStatusMap.keySet()) {
             if (key.contains("DummyFailedTest") && key.contains("firstFailed")) {
                 String status = testStatusMap.get(key);
-                log.debug("First failed test status: {}", status);
                 // In the new schema, failed tests should still be reported as "failed"
                 assertThat(status)
                     .as("First failed test should be failed")
@@ -159,7 +138,6 @@ public class CtrfReportValidationTest {
             }
             if (key.contains("DummyFailedTest") && (key.contains("secondFailed") || key.contains("Second failed"))) {
                 String status = testStatusMap.get(key);
-                log.debug("Second failed test status: {}", status);
                 // In the new schema, failed tests should still be reported as "failed"
                 assertThat(status)
                     .as("Second failed test should be failed")
@@ -174,7 +152,6 @@ public class CtrfReportValidationTest {
 
         // Skip this test if DummySuccessTest tests are not in the report
         if (!testStatusMap.keySet().stream().anyMatch(k -> k.contains("DummySuccessTest"))) {
-            log.info("Skipping verifyDummySuccessTestsArePassed because DummySuccessTest tests are not in the report");
             Assumptions.assumeTrue(false, "DummySuccessTest tests are not in the report");
             return;
         }
@@ -183,7 +160,6 @@ public class CtrfReportValidationTest {
         for (String key : testStatusMap.keySet()) {
             if (key.contains("DummySuccessTest") && key.contains("firstSuccess")) {
                 String status = testStatusMap.get(key);
-                log.debug("First success test status: {}", status);
                 // In the new schema, successful tests should still be reported as "passed"
                 assertThat(status)
                     .as("First success test should be passed")
@@ -191,7 +167,6 @@ public class CtrfReportValidationTest {
             }
             if (key.contains("DummySuccessTest") && key.contains("secondSuccess")) {
                 String status = testStatusMap.get(key);
-                log.debug("Second success test status: {}", status);
                 // In the new schema, successful tests should still be reported as "passed"
                 assertThat(status)
                     .as("Second success test should be passed")
@@ -210,17 +185,13 @@ public class CtrfReportValidationTest {
 
     private void assumeReportExists() {
         if (!testReportSteps.reportExists()) {
-            log.warn("CTRF report not loaded or invalid. Make sure it exists at: {}", REPORT_PATH);
             Assumptions.assumeTrue(false, "CTRF report not loaded or invalid. Make sure it exists at: " + REPORT_PATH);
             return;
         }
 
         if (testStatusMap == null || testStatusMap.isEmpty()) {
-            log.warn("No test statuses found in the CTRF report");
             Assumptions.assumeTrue(false, "No test statuses found in the CTRF report");
             return;
         }
-
-        log.debug("CTRF report exists and has the expected structure");
     }
 }
