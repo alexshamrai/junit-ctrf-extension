@@ -1,6 +1,5 @@
 package io.github.alexshamrai.integration;
 
-import io.github.alexshamrai.integration.service.FileSteps;
 import io.github.alexshamrai.integration.service.ReportService;
 import io.github.alexshamrai.integration.service.SchemaValidator;
 import io.github.alexshamrai.integration.service.TestReportSteps;
@@ -22,7 +21,6 @@ public class CtrfReportValidationTest {
     private static final String SCHEMA_PATH = "src/test/resources/schema/ctrf-schema.json";
     private static final String REPORT_PATH = "build/test-results/test/ctrf-report.json";
 
-    private final FileSteps fileSteps;
     private final SchemaValidator schemaValidator;
     private final ReportService reportService;
     private final TestReportSteps testReportSteps;
@@ -30,9 +28,8 @@ public class CtrfReportValidationTest {
     private Map<String, String> testStatusMap;
 
     public CtrfReportValidationTest() {
-        this.fileSteps = new FileSteps();
-        this.schemaValidator = new SchemaValidator(fileSteps);
-        this.reportService = new ReportService(fileSteps);
+        this.schemaValidator = new SchemaValidator();
+        this.reportService = new ReportService();
         this.testReportSteps = new TestReportSteps(reportService, schemaValidator);
     }
 
@@ -84,7 +81,7 @@ public class CtrfReportValidationTest {
 
         // Skip this test if DummyDisabledTest tests are not in the report
         boolean hasDummyDisabledTests = testStatusMap.keySet().stream().anyMatch(k -> k.contains("DummyDisabledTest"));
-        
+
         if (!hasDummyDisabledTests) {
             // This test is not applicable if there are no DummyDisabledTest tests in the report
             return;
@@ -114,7 +111,7 @@ public class CtrfReportValidationTest {
 
         // Skip this test if DummyFailedTest tests are not in the report
         boolean hasDummyFailedTests = testStatusMap.keySet().stream().anyMatch(k -> k.contains("DummyFailedTest"));
-        
+
         if (!hasDummyFailedTests) {
             // This test is not applicable if there are no DummyFailedTest tests in the report
             return;

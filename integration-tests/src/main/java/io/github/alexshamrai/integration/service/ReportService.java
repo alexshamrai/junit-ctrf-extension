@@ -13,10 +13,9 @@ import java.util.Map;
  */
 public class ReportService {
     private static final Logger log = LoggerFactory.getLogger(ReportService.class);
-    private final FileSteps fileSteps;
 
-    public ReportService(FileSteps fileSteps) {
-        this.fileSteps = fileSteps;
+    public ReportService() {
+        // Default constructor
     }
 
     /**
@@ -26,13 +25,13 @@ public class ReportService {
      * @return the report as a JSONObject, or null if the report could not be loaded
      */
     public JSONObject loadReport(String reportPath) {
-        if (!fileSteps.fileExists(reportPath)) {
+        if (!FileUtility.fileExists(reportPath)) {
             log.info("CTRF report not found at: {}", reportPath);
             return null;
         }
 
         try {
-            String reportContent = fileSteps.readFileContent(reportPath);
+            String reportContent = FileUtility.readFileContent(reportPath);
             log.debug("CTRF report content: {}", reportContent);
 
             JSONObject reportJson = new JSONObject(reportContent);
@@ -52,7 +51,7 @@ public class ReportService {
      */
     public Map<String, String> createTestStatusMap(JSONObject reportJson) {
         Map<String, String> testStatusMap = new HashMap<>();
-        
+
         if (reportJson == null) {
             log.warn("Cannot create test status map from null report");
             return testStatusMap;
@@ -140,17 +139,17 @@ public class ReportService {
         }
 
         JSONObject results = reportJson.getJSONObject("results");
-        
+
         if (!results.has("tool")) {
             log.warn("CTRF report does not contain 'results.tool' object");
             return false;
         }
-        
+
         if (!results.has("summary")) {
             log.warn("CTRF report does not contain 'results.summary' object");
             return false;
         }
-        
+
         if (!results.has("tests")) {
             log.warn("CTRF report does not contain 'results.tests' array");
             return false;
@@ -194,27 +193,27 @@ public class ReportService {
             log.warn("Total tests should be non-negative, but was: {}", summary.getInt("tests"));
             return false;
         }
-        
+
         if (summary.getInt("passed") < 0) {
             log.warn("Passed tests should be non-negative, but was: {}", summary.getInt("passed"));
             return false;
         }
-        
+
         if (summary.getInt("failed") < 0) {
             log.warn("Failed tests should be non-negative, but was: {}", summary.getInt("failed"));
             return false;
         }
-        
+
         if (summary.getInt("skipped") < 0) {
             log.warn("Skipped tests should be non-negative, but was: {}", summary.getInt("skipped"));
             return false;
         }
-        
+
         if (summary.getInt("pending") < 0) {
             log.warn("Pending tests should be non-negative, but was: {}", summary.getInt("pending"));
             return false;
         }
-        
+
         if (summary.getInt("other") < 0) {
             log.warn("Other tests should be non-negative, but was: {}", summary.getInt("other"));
             return false;
@@ -224,7 +223,7 @@ public class ReportService {
         int total = summary.getInt("tests");
         int sum = summary.getInt("passed") + summary.getInt("failed") + summary.getInt("skipped") + 
                 summary.getInt("pending") + summary.getInt("other");
-        
+
         if (total != sum) {
             log.warn("Total ({}) should equal passed + failed + skipped + pending + other ({})", total, sum);
             return false;
@@ -235,7 +234,7 @@ public class ReportService {
             log.warn("Start timestamp should be positive, but was: {}", summary.getLong("start"));
             return false;
         }
-        
+
         if (summary.getLong("stop") < summary.getLong("start")) {
             log.warn("Stop timestamp ({}) should be >= start timestamp ({})", 
                     summary.getLong("stop"), summary.getLong("start"));

@@ -19,11 +19,9 @@ import java.util.stream.Collectors;
  */
 public class SchemaValidator {
     private static final Logger log = LoggerFactory.getLogger(SchemaValidator.class);
-    private final FileSteps fileSteps;
     private final ObjectMapper objectMapper;
 
-    public SchemaValidator(FileSteps fileSteps) {
-        this.fileSteps = fileSteps;
+    public SchemaValidator() {
         this.objectMapper = new ObjectMapper();
     }
 
@@ -37,28 +35,28 @@ public class SchemaValidator {
      */
     public Set<ValidationMessage> validateAgainstSchema(JSONObject jsonObject, String schemaPath) throws IOException {
         // Load the JSON schema
-        String schemaContent = fileSteps.readFileContent(schemaPath);
-        
+        String schemaContent = FileUtility.readFileContent(schemaPath);
+
         // Create schema validator
         JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
         JsonSchema schema = factory.getSchema(schemaContent);
-        
+
         // Convert JSONObject to JsonNode
         JsonNode jsonNode = objectMapper.readTree(jsonObject.toString());
-        
+
         // Validate the report against the schema
         Set<ValidationMessage> validationResult = schema.validate(jsonNode);
-        
+
         if (!validationResult.isEmpty()) {
             String errors = validationResult.stream()
                     .map(ValidationMessage::getMessage)
                     .collect(Collectors.joining("\n"));
             log.info("Schema validation errors: {}", errors);
         }
-        
+
         return validationResult;
     }
-    
+
     /**
      * Checks if validation errors are related to missing new required fields.
      *
@@ -70,17 +68,17 @@ public class SchemaValidator {
         if (validationResult.isEmpty()) {
             return false;
         }
-        
+
         String errors = validationResult.stream()
                 .map(ValidationMessage::getMessage)
                 .collect(Collectors.joining());
-        
+
         for (String fieldName : fieldNames) {
             if (errors.contains(fieldName)) {
                 return true;
             }
         }
-        
+
         return false;
     }
 }
