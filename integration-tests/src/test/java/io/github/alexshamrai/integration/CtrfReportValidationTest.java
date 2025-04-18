@@ -3,8 +3,8 @@ package io.github.alexshamrai.integration;
 import io.github.alexshamrai.integration.service.FileSteps;
 import io.github.alexshamrai.integration.service.ReportService;
 import io.github.alexshamrai.integration.service.SchemaValidator;
+import io.github.alexshamrai.integration.service.TestReportSteps;
 import com.networknt.schema.ValidationMessage;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -28,23 +28,24 @@ public class CtrfReportValidationTest {
     private final FileSteps fileSteps;
     private final SchemaValidator schemaValidator;
     private final ReportService reportService;
+    private final TestReportSteps testReportSteps;
 
-    private JSONObject reportJson;
     private Map<String, String> testStatusMap;
 
     public CtrfReportValidationTest() {
         this.fileSteps = new FileSteps();
         this.schemaValidator = new SchemaValidator(fileSteps);
         this.reportService = new ReportService(fileSteps);
+        this.testReportSteps = new TestReportSteps(reportService, schemaValidator);
     }
 
     @BeforeAll
     void setup() {
         // Load the CTRF report JSON
-        reportJson = reportService.loadReport(REPORT_PATH);
-        if (reportJson != null) {
-            // Create a map of test method names to their statuses
-            testStatusMap = reportService.createTestStatusMap(reportJson);
+        boolean loaded = testReportSteps.loadReport(REPORT_PATH);
+        if (loaded) {
+            // Get the test status map
+            testStatusMap = testReportSteps.getTestStatusMap();
             log.info("Loaded CTRF report with {} test statuses", testStatusMap.size());
         } else {
             log.warn("Failed to load CTRF report from {}", REPORT_PATH);
@@ -56,13 +57,13 @@ public class CtrfReportValidationTest {
         assumeReportExists();
 
         // Validate the report against the schema
-        Set<ValidationMessage> validationResult = schemaValidator.validateAgainstSchema(reportJson, SCHEMA_PATH);
+        Set<ValidationMessage> validationResult = testReportSteps.validateAgainstSchema(SCHEMA_PATH);
 
         // If there are validation errors, check if they are related to missing new required fields
         if (!validationResult.isEmpty()) {
             // Check if the errors are related to missing required fields that are part of the new schema
             // but might not be present in the current implementation
-            boolean isMissingNewRequiredFields = schemaValidator.isMissingRequiredFields(validationResult, 
+            boolean isMissingNewRequiredFields = testReportSteps.isMissingRequiredFields(validationResult, 
                     "reportFormat", "specVersion");
 
             if (!isMissingNewRequiredFields) {
@@ -73,19 +74,19 @@ public class CtrfReportValidationTest {
         }
 
         // Additional validation to ensure the report has the expected structure
-        assertThat(reportService.verifyReportStructure(reportJson))
+        assertThat(testReportSteps.verifyReportStructure())
             .as("CTRF report should have the expected structure")
             .isTrue();
 
         // Check for new required fields if they exist
-        if (reportJson.has("reportFormat")) {
-            assertThat(reportJson.getString("reportFormat"))
+        if (testReportSteps.hasField("reportFormat")) {
+            assertThat(testReportSteps.getString("reportFormat"))
                 .as("reportFormat should be 'CTRF'")
                 .isEqualTo("CTRF");
         }
 
-        if (reportJson.has("specVersion")) {
-            assertThat(reportJson.getString("specVersion").matches("^[0-9]+\\.[0-9]+\\.[0-9]+$"))
+        if (testReportSteps.hasField("specVersion")) {
+            assertThat(testReportSteps.getString("specVersion").matches("^[0-9]+\\.[0-9]+\\.[0-9]+$"))
                 .as("specVersion should match the pattern ^[0-9]+\\.[0-9]+\\.[0-9]+$")
                 .isTrue();
         }
@@ -202,21 +203,15 @@ public class CtrfReportValidationTest {
     @Test
     void verifySummaryIsCorrect() {
         assumeReportExists();
-        assertThat(reportService.verifySummary(reportJson))
+        assertThat(testReportSteps.verifySummary())
             .as("Summary should be correct")
             .isTrue();
     }
 
     private void assumeReportExists() {
-        if (reportJson == null) {
-            log.warn("CTRF report not loaded. Make sure it exists at: {}", REPORT_PATH);
-            Assumptions.assumeTrue(false, "CTRF report not loaded. Make sure it exists at: " + REPORT_PATH);
-            return;
-        }
-
-        if (!reportJson.has("results")) {
-            log.warn("CTRF report does not contain 'results' object");
-            Assumptions.assumeTrue(false, "CTRF report does not contain 'results' object");
+        if (!testReportSteps.reportExists()) {
+            log.warn("CTRF report not loaded or invalid. Make sure it exists at: {}", REPORT_PATH);
+            Assumptions.assumeTrue(false, "CTRF report not loaded or invalid. Make sure it exists at: " + REPORT_PATH);
             return;
         }
 
