@@ -1,7 +1,6 @@
 package io.github.alexshamrai;
 
 import io.github.alexshamrai.config.ConfigReader;
-import io.github.alexshamrai.ctrf.model.Extra;
 import io.github.alexshamrai.ctrf.model.Test;
 import io.github.alexshamrai.model.TestDetails;
 import lombok.RequiredArgsConstructor;
@@ -61,20 +60,6 @@ public class TestProcessor {
             .start(details.getStartTime())
             .stop(stopTime)
             .duration(stopTime - details.getStartTime())
-            .extra(createExtraWithThreadId())
-            .build();
-    }
-
-    /**
-     * Creates an Extra object containing the current thread ID.
-     * 
-     * <p>Thread ID information can be useful for diagnosing test execution issues,
-     * especially in parallel test environments.</p>
-     *
-     * @return an Extra object containing the current thread ID
-     */
-    private Extra createExtraWithThreadId() {
-        return Extra.builder()
             .threadId(Thread.currentThread().getName())
             .build();
     }
