@@ -1,4 +1,4 @@
-name: CI
+name: Build and run Unit tests
 
 on:
   pull_request:
@@ -24,7 +24,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle Wrapper
-        run: ./gradlew clean build -x test
+        run:    ./gradlew clean build -x test -x validateCtrfReport -x generateCtrfReport
 
       - name: Run unit tests
         run: ./gradlew test -x :integration-tests:test
@@ -33,4 +33,19 @@ jobs:
         uses: ctrf-io/github-test-reporter@v1.0.14
         with:
           report-path: 'ctrf-report.json'
+        if: always()
+
+      - name: Check test counts
+        run: |
+          echo "Checking test counts in CTRF report..."
+          if [ -f "ctrf-report.json" ]; then
+            passed=$(grep -o '"passed":[0-9]*' ctrf-report.json | cut -d':' -f2)
+            failed=$(grep -o '"failed":[0-9]*' ctrf-report.json | cut -d':' -f2)
+            skipped=$(grep -o '"skipped":[0-9]*' ctrf-report.json | cut -d':' -f2)
+            echo "Passed tests: $passed"
+            echo "Failed tests: $failed"
+            echo "Skipped tests: $skipped"
+          else
+            echo "CTRF report not found"
+          fi
         if: always()

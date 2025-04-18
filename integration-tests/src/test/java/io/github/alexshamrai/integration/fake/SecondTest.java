@@ -1,8 +1,8 @@
-package io.github.alexshamrai.integration;
+package io.github.alexshamrai.integration.fake;
 
 import org.junit.jupiter.api.Test;
 
-public class SecondTest extends BaseIntegrationTest {
+public class SecondTest extends BaseFakeTest {
 
     @Test
     void secondTestOne() {
@@ -15,4 +15,3 @@ public class SecondTest extends BaseIntegrationTest {
     }
 
 }
-

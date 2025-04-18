@@ -1,9 +1,9 @@
-package io.github.alexshamrai.integration;
+package io.github.alexshamrai.integration.fake;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-public class DummyDisabledTest extends BaseIntegrationTest {
+public class DummyDisabledTest extends BaseFakeTest {
 
     @Test
     @Disabled

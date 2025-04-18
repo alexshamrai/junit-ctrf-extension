@@ -1,25 +1,24 @@
-package io.github.alexshamrai.integration;
+package io.github.alexshamrai.integration.fake;
 
 import org.junit.jupiter.api.Test;
 
-public class FirstLongTest extends BaseIntegrationTest {
+public class SecondLongTest extends BaseFakeTest {
 
     @Test
-    void firstLongOneSecondTest() throws InterruptedException {
+    void secondLongOneSecondTest() throws InterruptedException {
         System.out.println("OneSecondTest");
         Thread.sleep(1000);
     }
 
     @Test
-    void firstLongHalfSecondTest() throws InterruptedException {
+    void secondLongHalfSecondTest() throws InterruptedException {
         System.out.println("halfSecondTest");
         Thread.sleep(500);
     }
 
     @Test
-    void firstLongTwoSecondTest() throws InterruptedException {
+    void secondLongTwoSecondTest() throws InterruptedException {
         System.out.println("TwoSecondTest");
         Thread.sleep(2000);
     }
 }
-

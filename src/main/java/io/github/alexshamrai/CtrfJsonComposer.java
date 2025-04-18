@@ -29,7 +29,8 @@ public class CtrfJsonComposer {
      *
      * @param summary the test execution summary
      * @param tests the list of test results
-     * @return a complete CTRF JSON object ready for serialization
+     * @return a complete CTRF JSON object ready for serialization with required fields:
+     *         reportFormat (set to "CTRF") and specVersion (set to "0.0.0")
      */
     public CtrfJson generateCtrfJson(Summary summary, List<Test> tests) {
         var results = Results.builder()

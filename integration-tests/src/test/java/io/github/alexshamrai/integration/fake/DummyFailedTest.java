@@ -1,9 +1,9 @@
-package io.github.alexshamrai.integration;
+package io.github.alexshamrai.integration.fake;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class DummyFailedTest extends BaseIntegrationTest {
+public class DummyFailedTest extends BaseFakeTest {
 
     @Test
     void firstFailedTest() {
