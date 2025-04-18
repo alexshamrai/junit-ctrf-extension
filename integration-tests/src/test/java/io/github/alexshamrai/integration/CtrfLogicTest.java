@@ -1,0 +1,140 @@
+package io.github.alexshamrai.integration;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.alexshamrai.ctrf.model.CtrfJson;
+import io.github.alexshamrai.ctrf.model.Test.TestStatus;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class CtrfLogicTest {
+
+    private static final String REPORT_PATH = "build/test-results/test/ctrf-report.json";
+
+    private final ObjectMapper objectMapper;
+    private CtrfJson report;
+    private File reportFile;
+
+    public CtrfLogicTest() {
+        this.objectMapper = new ObjectMapper();
+    }
+
+    @BeforeAll
+    void setup() throws IOException {
+        reportFile = new File(REPORT_PATH);
+        if (!reportFile.exists()) {
+            return;
+        }
+        report = objectMapper.readValue(reportFile, CtrfJson.class);
+    }
+
+    @Test
+    void verifyTestStatuses() {
+        var tests = report.getResults().getTests();
+        assertThat(tests).isNotNull().isNotEmpty();
+
+        tests.forEach(test -> {
+            assertThat(test.getName()).isNotNull().isNotEmpty();
+            assertThat(test.getStatus()).isNotNull();
+        });
+
+        var testNameToExpectedStatus = Map.of(
+            "firstDisabledTest", TestStatus.SKIPPED,
+            "secondDisabledTest", TestStatus.SKIPPED,
+            "firstFailedTest", TestStatus.FAILED,
+            "secondFailedTest", TestStatus.FAILED,
+            "firstSuccessTest", TestStatus.PASSED,
+            "secondSuccessTest", TestStatus.PASSED
+        );
+
+        testNameToExpectedStatus.forEach((testName, expectedStatus) -> {
+            tests.stream()
+                .filter(test -> test.getName() != null && test.getName().contains(testName))
+                .findFirst()
+                .ifPresent(test ->
+                    assertThat(test.getStatus())
+                        .as(testName + " should have " + expectedStatus + " status")
+                        .isEqualTo(expectedStatus)
+                );
+        });
+    }
+
+    @Test
+    void verifySummaryIsCorrect() {
+        var summary = report.getResults().getSummary();
+        assertThat(summary).isNotNull();
+
+        assertThat(summary.getTests()).isEqualTo(16);
+        assertThat(summary.getPassed()).isEqualTo(12);
+        assertThat(summary.getFailed()).isEqualTo(2);
+        assertThat(summary.getSkipped()).isEqualTo(2);
+        assertThat(summary.getPending()).isEqualTo(0);
+        assertThat(summary.getOther()).isEqualTo(0);
+        assertThat(summary.getStart()).isGreaterThan(0);
+        assertThat(summary.getStop()).isGreaterThanOrEqualTo(summary.getStart());
+
+        var total = summary.getTests();
+        var sum = summary.getPassed() + summary.getFailed() + summary.getSkipped() +
+                  summary.getPending() + summary.getOther();
+        assertThat(total).isEqualTo(sum);
+    }
+
+    @Test
+    void verifyLongTestDurations() {
+        var tests = report.getResults().getTests();
+        assertThat(tests).isNotNull().isNotEmpty();
+
+        var testNameToDuration = Map.of(
+            "firstLongTwoSecondTest()", 2000L,
+            "firstLongOneSecondTest()", 1000L,
+            "firstLongHalfSecondTest()", 500L,
+            "secondLongTwoSecondTest()", 2000L,
+            "secondLongOneSecondTest()", 1000L,
+            "secondLongHalfSecondTest()", 500L
+        );
+
+        testNameToDuration.forEach((testName, expectedMinDuration) -> {
+            var testOptional = tests.stream()
+                .filter(test -> test.getName() != null && test.getName().equals(testName))
+                .findFirst();
+
+            assertThat(testOptional.isPresent())
+                .as("Test with name '" + testName + "' should be present in the report")
+                .isTrue();
+
+            var test = testOptional.get();
+            assertThat(test.getDuration())
+                .as(testName + " should have duration equal to or longer than " + expectedMinDuration + "ms")
+                .isGreaterThanOrEqualTo(expectedMinDuration);
+        });
+    }
+
+    // On ci tests are run in 2 threads. Test is checking that the number of threads is correct.
+    @Test
+    void verifyTestsRunInMultipleThreads() {
+        var tests = report.getResults().getTests();
+        assertThat(tests).isNotNull().isNotEmpty();
+
+        var threadIds = tests.stream()
+            .map(io.github.alexshamrai.ctrf.model.Test::getThreadId)
+            .distinct()
+            .toList();
+
+        assertThat(threadIds)
+            .as("Tests should run in exactly 2 different threads")
+            .hasSize(2);
+
+        tests.forEach(test -> {
+            assertThat(test.getThreadId())
+                .as("Test '" + test.getName() + "' should have a thread ID")
+                .isNotNull();
+        });
+    }
+}
