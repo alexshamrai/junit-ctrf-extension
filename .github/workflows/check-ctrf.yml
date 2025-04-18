@@ -30,7 +30,7 @@ jobs:
         run: ./gradlew :integration-tests:test -Dthreads=${{ github.event.inputs.threads }}
 
       - name: Publish CTRF Test Report
-        uses: ctrf-io/github-test-reporter@v1.0.13
+        uses: ctrf-io/github-test-reporter@v1.0.14
         with:
           report-path: 'integration-tests/build/test-results/test/ctrf-report.json'
 
