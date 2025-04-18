@@ -10,14 +10,19 @@ repositories {
 }
 
 dependencies {
+    // SLF4J for logging
+    implementation 'org.slf4j:slf4j-api:2.0.17'
+    implementation 'ch.qos.logback:logback-classic:1.5.18'
+
+    // JSON schema validation
+    implementation 'org.json:json:20240303'
+    implementation 'com.networknt:json-schema-validator:1.0.86'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+
     testImplementation platform('org.junit:junit-bom:5.12.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.junit.platform:junit-platform-launcher'
     testImplementation project(':')
-
-    // JSON schema validation
-    testImplementation 'org.json:json:20240303'
-    testImplementation 'com.networknt:json-schema-validator:1.0.86'
 }
 
 test {
@@ -51,7 +56,6 @@ test {
     }
 }
 
-// Task to run specific test classes to generate the CTRF report
 task generateCtrfReport(type: Test) {
     description = 'Runs specific test classes to generate the CTRF report'
     group = 'verification'
@@ -69,7 +73,6 @@ task generateCtrfReport(type: Test) {
     }
 }
 
-// Task to validate the CTRF report
 task validateCtrfReport(type: Test) {
     description = 'Validates the CTRF report against the schema and verifies test statuses'
     group = 'verification'
@@ -86,9 +89,7 @@ task validateCtrfReport(type: Test) {
         showStandardStreams = true
     }
 
-    // Make this task depend on generateCtrfReport
     dependsOn generateCtrfReport
 }
 
-// Add validateCtrfReport as a dependency of the check task
 check.dependsOn validateCtrfReport
