@@ -30,7 +30,7 @@ jobs:
         run: ./gradlew test -x :integration-tests:test
 
       - name: Run integration tests
-        run: ./gradlew :integration-tests:test
+        run: ./gradlew :integration-tests:validateCtrfReport
         if: always()
 
       - name: Publish CTRF Test Report
