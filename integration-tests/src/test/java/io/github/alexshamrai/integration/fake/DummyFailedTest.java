@@ -1,4 +1,4 @@
-package io.github.alexshamrai.integration;
+package io.github.alexshamrai.integration.fake;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

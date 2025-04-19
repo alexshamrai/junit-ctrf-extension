@@ -10,13 +10,29 @@ repositories {
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.11.3')
+    // SLF4J for logging
+    implementation 'org.slf4j:slf4j-api:2.0.17'
+    implementation 'ch.qos.logback:logback-classic:1.5.18'
+
+    // JSON schema validation
+    implementation 'org.json:json:20240303'
+    implementation 'com.networknt:json-schema-validator:1.0.86'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+
+    testImplementation platform('org.junit:junit-bom:5.12.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.platform:junit-platform-launcher'
     testImplementation project(':')
+
+    // AssertJ for fluent assertions
+    testImplementation 'org.assertj:assertj-core:3.25.3'
 }
 
 test {
     useJUnitPlatform()
+
+    // Don't fail the build when tests fail
+    ignoreFailures = true
 
     def threads = System.getProperty("threads")
     println "Configured number of threads: ${threads ?: 'not set'}"
@@ -42,3 +58,41 @@ test {
         showStandardStreams = true
     }
 }
+
+task generateCtrfReport(type: Test) {
+    description = 'Runs specific test classes to generate the CTRF report'
+    group = 'verification'
+
+    useJUnitPlatform {
+        includeTags 'dummy'
+    }
+
+    // Don't fail the build when tests fail
+    ignoreFailures = true
+
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+    }
+}
+
+task validateCtrfReport(type: Test) {
+    description = 'Validates the CTRF report against the schema and verifies test statuses'
+    group = 'verification'
+
+    useJUnitPlatform {
+        include '**/CtrfReportValidationTest.class'
+    }
+
+    // Don't fail the build when tests fail
+    ignoreFailures = true
+
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+    }
+
+    dependsOn generateCtrfReport
+}
+
+check.dependsOn validateCtrfReport

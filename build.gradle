@@ -15,7 +15,7 @@ repositories {
 }
 
 ext {
-    junitVersion = '5.11.3'
+    junitVersion = '5.12.2'
     lombokVersion = '1.18.38'
     jaksonVersion = '2.18.3'
     ownerVersion = '1.0.12'
@@ -31,6 +31,7 @@ dependencies {
     implementation "org.aeonbits.owner:owner:${ownerVersion}"
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testImplementation "org.junit.platform:junit-platform-launcher"
     testImplementation "org.mockito:mockito-core:${mockitoVersion}"
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
 }
