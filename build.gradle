@@ -8,20 +8,29 @@ plugins {
 }
 
 group = 'io.github.alexshamrai'
-version = '0.3.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
 }
 
 ext {
+    projectVersion = '0.3.0-SNAPSHOT'
+    releaseVersion = '0.3.0'
+
     junitVersion = '5.12.2'
     lombokVersion = '1.18.38'
     jaksonVersion = '2.18.3'
     ownerVersion = '1.0.12'
     mockitoVersion = '5.17.0'
     assertjVersion = '3.27.3'
+
+    slf4jVersion = '2.0.17'
+    logbackVersion = '1.5.18'
+    jacksonModuleJsonSchemaVersion = '2.15.2'
+    jsonSchemaValidatorVersion = '2.2.14'
 }
+
+version = projectVersion
 
 dependencies {
     implementation platform("org.junit:junit-bom:${junitVersion}")
@@ -48,7 +57,7 @@ checkstyle {
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
-    coordinates("io.github.alexshamrai", "junit-ctrf-extension", "0.3.0")
+    coordinates("io.github.alexshamrai", "junit-ctrf-extension", "${releaseVersion}")
     pom {
         name = "Junit CTRF Extension"
         description = "Junit extension to create test reports that follow the CTRF standard."
