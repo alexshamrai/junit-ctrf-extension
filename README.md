@@ -62,7 +62,7 @@ To use the JUnit CTRF Extension, you need to register it in your JUnit test clas
 ```java
 @ExtendWith(CtrfExtension.class)
 public class MyTest {
-    
+
     @Test
     void testExample() {
         // Your test code
@@ -74,7 +74,12 @@ For more details on JUnit extensions, see the [JUnit 5 User Guide](https://junit
 
 ### Configure Properties
 
-Create a `ctrf.properties` file in your project's `src/test/resources` directory to customize the CTRF report:
+You can configure the CTRF extension in two ways:
+
+1. **Using a properties file**: Create a `ctrf.properties` file in your project's `src/test/resources` directory.
+2. **Using system properties**: Pass configuration values as JVM system properties using `-D` parameters.
+
+#### Properties File Example
 
 ```properties
 ctrf.report.path=build/test-results/test/ctrf-report.json
@@ -98,6 +103,26 @@ ctrf.branch.name=main
 ctrf.os.platform=Linux
 ctrf.os.release=5.4.0-42-generic
 ctrf.os.version=Ubuntu 20.04
+```
+
+#### Using System Properties
+
+You can override any property by passing it as a system property. For example:
+
+```
+-Dctrf.report.path=custom/path/report.json
+-Dctrf.app.name="My Custom App Name"
+```
+
+**Note:**
+
+You need to ensure that system properties are passed to the test task by adding the following to your `build.gradle` file:
+
+```groovy
+test {
+    // This ensures "ctrf" system properties are passed to the test
+    systemProperties += System.properties.findAll { k, v -> k.toString().startsWith("ctrf") }
+}
 ```
 
 ## Configuration Reference

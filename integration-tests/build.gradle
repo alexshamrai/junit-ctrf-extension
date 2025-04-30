@@ -49,6 +49,8 @@ def configureThreads(Test task) {
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
 
+    systemProperties += System.properties.findAll { k, v -> k.toString().startsWith("ctrf") }
+
     testLogging {
         events "passed", "skipped", "failed"
         showStandardStreams = true

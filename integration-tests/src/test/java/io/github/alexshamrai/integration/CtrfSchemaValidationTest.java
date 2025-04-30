@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CtrfSchemaValidationTest {
 
     private static final String SCHEMA_PATH = "src/test/resources/schema/ctrf-schema.json";
-    private static final String REPORT_PATH = "build/test-results/test/ctrf-report.json";
+    private static final String REPORT_PATH = "build/test-results/ctrf-report.json";
 
     private final ObjectMapper objectMapper;
     private final JsonSchemaValidator schemaValidator;

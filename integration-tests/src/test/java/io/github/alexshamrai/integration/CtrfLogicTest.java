@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CtrfLogicTest {
 
-    private static final String REPORT_PATH = "build/test-results/test/ctrf-report.json";
+    private static final String REPORT_PATH = "build/test-results/ctrf-report.json";
 
     private final ObjectMapper objectMapper;
     private CtrfJson report;
@@ -136,5 +136,23 @@ public class CtrfLogicTest {
                 .as("Test '" + test.getName() + "' should have a thread ID")
                 .isNotNull();
         });
+    }
+
+    // Verify that build parameters passed as system properties like "-Dctrf.report.name="Overridden Report Name"" are correctly set
+    // The values should be exactly as in check-ctrf.yml command
+    @Test
+    void verifyBuildParametersFromSystemProperties() {
+        var environment = report.getResults().getEnvironment();
+        assertThat(environment).isNotNull();
+
+        assertThat(environment.getBuildName())
+            .as("Build name should match the value passed via -Dctrf.build.name")
+            .isEqualTo("system-build");
+        assertThat(environment.getBuildNumber())
+            .as("Build number should match the value passed via -Dctrf.build.number")
+            .isEqualTo("789");
+        assertThat(environment.getBuildUrl())
+            .as("Build URL should match the value passed via -Dctrf.build.url")
+            .isEqualTo("http://system.example.com/build/");
     }
 }
