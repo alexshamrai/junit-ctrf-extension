@@ -34,18 +34,3 @@ jobs:
         with:
           report-path: 'ctrf-report.json'
         if: always()
-
-      - name: Check test counts
-        run: |
-          echo "Checking test counts in CTRF report..."
-          if [ -f "ctrf-report.json" ]; then
-            passed=$(grep -o '"passed":[0-9]*' ctrf-report.json | cut -d':' -f2)
-            failed=$(grep -o '"failed":[0-9]*' ctrf-report.json | cut -d':' -f2)
-            skipped=$(grep -o '"skipped":[0-9]*' ctrf-report.json | cut -d':' -f2)
-            echo "Passed tests: $passed"
-            echo "Failed tests: $failed"
-            echo "Skipped tests: $skipped"
-          else
-            echo "CTRF report not found"
-          fi
-        if: always()

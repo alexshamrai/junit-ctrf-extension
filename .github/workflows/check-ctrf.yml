@@ -30,13 +30,18 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run integration tests
-        run: ./gradlew :integration-tests:validateCtrfReport -Dthreads=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.threads || '2' }}
+        run: |
+          ./gradlew :integration-tests:validateCtrfReport \
+          -Dthreads=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.threads || '2' }} \
+          -Dctrf.build.name=system-build \
+          -Dctrf.build.number=789 \
+          -Dctrf.build.url=http://system.example.com/build/
         if: always()
 
       - name: Publish CTRF Test Report
         uses: ctrf-io/github-test-reporter@v1.0.14
         with:
-          report-path: 'integration-tests/build/test-results/test/ctrf-report.json'
+          report-path: 'integration-tests/build/test-results/ctrf-report.json'
 
           summary-report: true
           test-report: true
