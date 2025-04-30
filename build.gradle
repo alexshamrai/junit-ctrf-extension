@@ -14,8 +14,8 @@ repositories {
 }
 
 ext {
-    projectVersion = '0.3.2-SNAPSHOT'
-    releaseVersion = '0.3.1'
+    projectVersion = '0.3.3-SNAPSHOT'
+    releaseVersion = '0.3.2'
 
     junitVersion = '5.12.2'
     lombokVersion = '1.18.38'
