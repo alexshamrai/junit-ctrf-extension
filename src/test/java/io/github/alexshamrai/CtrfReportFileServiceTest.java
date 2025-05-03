@@ -3,6 +3,7 @@ package io.github.alexshamrai;
 import io.github.alexshamrai.config.ConfigReader;
 import io.github.alexshamrai.config.CtrfConfig;
 import io.github.alexshamrai.ctrf.model.CtrfJson;
+import io.github.alexshamrai.ctrf.model.Results;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,17 +16,19 @@ import java.io.PrintStream;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 
-public class FileWriterTest {
+public class CtrfReportFileServiceTest {
 
     private ConfigReader configReader;
-    private FileWriter fileWriter;
+    private CtrfReportFileService ctrfReportFileService;
     private CtrfJson ctrfJson;
     private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
     private final PrintStream originalErr = System.err;
@@ -37,7 +40,7 @@ public class FileWriterTest {
         customConfig.put("ctrf.report.path", filePath);
         var mockConfig = ConfigFactory.create(CtrfConfig.class, customConfig);
         configReader = new ConfigReader(mockConfig);
-        fileWriter = new FileWriter(configReader);
+        ctrfReportFileService = new CtrfReportFileService(configReader);
         ctrfJson = new CtrfJson();
         System.setErr(new PrintStream(errContent));
     }
@@ -50,7 +53,7 @@ public class FileWriterTest {
 
     @Test
     void shouldSuccessfullyWriteResultsToFile() throws IOException {
-        fileWriter.writeResultsToFile(ctrfJson);
+        ctrfReportFileService.writeResultsToFile(ctrfJson);
 
         var path = Paths.get(filePath);
         assertThat(Files.exists(path)).isTrue();
@@ -59,27 +62,28 @@ public class FileWriterTest {
 
     @Test
     void shouldOverwriteExistingFile() throws IOException {
-        Files.createFile(Paths.get(filePath));
-        var initialModifiedTime = Files.getLastModifiedTime(Paths.get(filePath)).toMillis();
+        var path = Paths.get(filePath);
+        Files.createFile(path);
+        var initialModifiedTime = Files.getLastModifiedTime(path).toMillis();
 
-        fileWriter.writeResultsToFile(ctrfJson);
-        var newModifiedTime = Files.getLastModifiedTime(Paths.get(filePath)).toMillis();
+        ctrfReportFileService.writeResultsToFile(ctrfJson);
+        var newModifiedTime = Files.getLastModifiedTime(path).toMillis();
 
         assertThat(initialModifiedTime).isNotEqualTo(newModifiedTime);
-        assertThat(errContent.toString()).contains("File already exists: " + filePath);
+        assertThat(errContent.toString()).isEmpty();
     }
 
     @Test
     void shouldHandleAccessDeniedException() {
         var nestedFilePath = "nested/ctrf.json";
         configReader = createConfigReaderWithPath(nestedFilePath);
-        fileWriter = new FileWriter(configReader);
+        ctrfReportFileService = new CtrfReportFileService(configReader);
 
         try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
             mockedFiles.when(() -> Files.createDirectories(Paths.get("nested"))).thenThrow(new AccessDeniedException("nested"));
             mockedFiles.when(() -> Files.exists(any())).thenReturn(false);
 
-            fileWriter.writeResultsToFile(ctrfJson);
+            ctrfReportFileService.writeResultsToFile(ctrfJson);
 
             mockedFiles.verify(() -> Files.createDirectories(Paths.get("nested")), times(1));
             assertThat(errContent.toString()).contains("Access denied: " + nestedFilePath);
@@ -90,13 +94,13 @@ public class FileWriterTest {
     void shouldHandleIoException() {
         var nestedFilePath = "test-dir/ctrf.json";
         configReader = createConfigReaderWithPath(nestedFilePath);
-        fileWriter = new FileWriter(configReader);
+        ctrfReportFileService = new CtrfReportFileService(configReader);
 
         try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
             mockedFiles.when(() -> Files.createDirectories(Paths.get("test-dir"))).thenThrow(new IOException("IO error"));
             mockedFiles.when(() -> Files.exists(any())).thenReturn(false);
 
-            fileWriter.writeResultsToFile(ctrfJson);
+            ctrfReportFileService.writeResultsToFile(ctrfJson);
 
             mockedFiles.verify(() -> Files.createDirectories(Paths.get("test-dir")), times(1));
             assertThat(errContent.toString()).contains("Failed to write results to file: " + nestedFilePath);
@@ -108,5 +112,41 @@ public class FileWriterTest {
         customConfig.put("ctrf.report.path", path);
         var mockConfig = ConfigFactory.create(CtrfConfig.class, customConfig);
         return new ConfigReader(mockConfig);
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenReportFileDoesNotExist() {
+        List<io.github.alexshamrai.ctrf.model.Test> tests = ctrfReportFileService.getExistingTests();
+
+        assertThat(tests).isEmpty();
+    }
+
+    @Test
+    void shouldReturnTestsFromExistingReport() {
+        var test1 = io.github.alexshamrai.ctrf.model.Test.builder().name("Test1").build();
+        var test2 = io.github.alexshamrai.ctrf.model.Test.builder().name("Test2").build();
+        var testsList = new ArrayList<io.github.alexshamrai.ctrf.model.Test>();
+        testsList.add(test1);
+        testsList.add(test2);
+
+        var results = Results.builder().tests(testsList).build();
+        var ctrfJsonWithTests = CtrfJson.builder().results(results).build();
+
+        ctrfReportFileService.writeResultsToFile(ctrfJsonWithTests);
+
+        var existingTests = ctrfReportFileService.getExistingTests();
+
+        assertThat(existingTests).hasSize(2);
+        assertThat(existingTests).extracting("name").containsExactly("Test1", "Test2");
+    }
+
+    @Test
+    void shouldHandleErrorWhenReadingExistingReport() throws IOException {
+        Files.writeString(Paths.get(filePath), "invalid json");
+
+        List<io.github.alexshamrai.ctrf.model.Test> existingTests = ctrfReportFileService.getExistingTests();
+
+        assertThat(existingTests).isEmpty();
+        assertThat(errContent.toString()).contains("Failed to read existing report file");
     }
 }
