@@ -71,8 +71,8 @@ public class CtrfLogicTest {
         var summary = report.getResults().getSummary();
         assertThat(summary).isNotNull();
 
-        assertThat(summary.getTests()).isEqualTo(16);
-        assertThat(summary.getPassed()).isEqualTo(12);
+        assertThat(summary.getTests()).isEqualTo(17);
+        assertThat(summary.getPassed()).isEqualTo(13);
         assertThat(summary.getFailed()).isEqualTo(2);
         assertThat(summary.getSkipped()).isEqualTo(2);
         assertThat(summary.getPending()).isEqualTo(0);
@@ -154,5 +154,18 @@ public class CtrfLogicTest {
         assertThat(environment.getBuildUrl())
             .as("Build URL should match the value passed via -Dctrf.build.url")
             .isEqualTo("http://system.example.com/build/");
+    }
+
+    @Test
+    void verifyFlakyTestContainsValidData() {
+        var tests = report.getResults().getTests();
+        var flakyTest = tests.stream()
+            .filter(test -> test.getName().equals("Flaky test passed on the second run"))
+            .findFirst().get();
+
+        assertThat(flakyTest.getFlaky()).isTrue();
+        assertThat(flakyTest.getRetries()).isPositive();
+        assertThat(flakyTest.getMessage()).isNotEmpty();
+        assertThat(flakyTest.getTrace()).isNotEmpty();
     }
 }

@@ -3,13 +3,15 @@ package io.github.alexshamrai;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.alexshamrai.config.ConfigReader;
 import io.github.alexshamrai.ctrf.model.CtrfJson;
+import io.github.alexshamrai.ctrf.model.Test;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Handles writing the CTRF JSON report to a file on the filesystem.
@@ -19,7 +21,7 @@ import java.nio.file.Paths;
  * by the configuration provided through {@link ConfigReader}.
  */
 @RequiredArgsConstructor
-public class FileWriter {
+public class CtrfReportFileService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ConfigReader configReader;
@@ -40,17 +42,44 @@ public class FileWriter {
                 Files.createDirectories(path.getParent());
             }
 
-            if (Files.exists(path)) {
-                System.err.println("File already exists: " + filePath);
-            }
-
             objectMapper.writeValue(path.toFile(), ctrfJson);
         } catch (AccessDeniedException e) {
             System.err.println("Access denied: " + filePath + " - " + e.getMessage());
-        } catch (FileAlreadyExistsException e) {
-            System.err.println("File already exists: " + filePath + " - " + e.getMessage());
         } catch (IOException e) {
             System.err.println("Failed to write results to file: " + filePath + " - " + e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the list of tests from an existing report file, if available.
+     *
+     * @return List of tests from the existing report, or an empty list if no report exists
+     */
+    public List<Test> getExistingTests() {
+        CtrfJson existingReport = readExistingReport();
+        return existingReport != null ? existingReport.getResults().getTests() : Collections.emptyList();
+    }
+
+    /**
+     * Reads an existing CTRF JSON report file if it exists.
+     *
+     * @return CtrfJson object containing the report data, or null if the file doesn't exist or can't be read
+     */
+    private CtrfJson readExistingReport() {
+        var filePath = configReader.getReportPath();
+        var path = Paths.get(filePath);
+
+        if (!Files.exists(path)) {
+            return null;
+        }
+
+        try {
+            var ctrf = objectMapper.readValue(path.toFile(), CtrfJson.class);
+            System.out.println("File already exists: " + filePath + ". Tests might have been rerun.");
+            return ctrf;
+        } catch (IOException e) {
+            System.err.println("Failed to read existing report file: " + filePath + " - " + e.getMessage());
+            return null;
         }
     }
 }

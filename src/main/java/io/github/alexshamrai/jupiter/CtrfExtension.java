@@ -1,7 +1,7 @@
 package io.github.alexshamrai.jupiter;
 
 import io.github.alexshamrai.CtrfJsonComposer;
-import io.github.alexshamrai.FileWriter;
+import io.github.alexshamrai.CtrfReportFileService;
 import io.github.alexshamrai.SuiteExecutionErrorHandler;
 import io.github.alexshamrai.TestProcessor;
 import io.github.alexshamrai.config.ConfigReader;
@@ -43,17 +43,17 @@ import static io.github.alexshamrai.util.TestDetailsUtil.createTestDetails;
  */
 public class CtrfExtension implements TestRunExtension, BeforeEachCallback, AfterEachCallback, TestWatcher {
 
-    private static final List<Test> tests = new CopyOnWriteArrayList<>();
+    private static List<Test> tests = new CopyOnWriteArrayList<>();
     private static long testRunStartTime;
     private final ThreadLocal<TestDetails> testDetails = new ThreadLocal<>();
-    private final FileWriter fileWriter;
+    private final CtrfReportFileService ctrfReportFileService;
     private final TestProcessor testProcessor;
     private final SuiteExecutionErrorHandler suiteExecutionErrorHandler;
     private final CtrfJsonComposer ctrfJsonComposer;
 
     public CtrfExtension() {
         var configReader = new ConfigReader();
-        this.fileWriter = new FileWriter(configReader);
+        this.ctrfReportFileService = new CtrfReportFileService(configReader);
         this.testProcessor = new TestProcessor(configReader);
         this.suiteExecutionErrorHandler = new SuiteExecutionErrorHandler(testProcessor);
         this.ctrfJsonComposer = new CtrfJsonComposer(configReader);
@@ -63,6 +63,7 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
     public void beforeAllTests(ExtensionContext context) {
         testRunStartTime = System.currentTimeMillis();
         testDetails.set(createTestDetails(context));
+        tests.addAll(ctrfReportFileService.getExistingTests());
     }
 
     @Override
@@ -81,7 +82,7 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
         var summary = SummaryUtil.createSummary(tests, testRunStartTime, testRunStopTime);
         var ctrfJson = ctrfJsonComposer.generateCtrfJson(summary, tests);
 
-        fileWriter.writeResultsToFile(ctrfJson);
+        ctrfReportFileService.writeResultsToFile(ctrfJson);
     }
 
     @Override
@@ -94,13 +95,22 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
         long stopTime = System.currentTimeMillis();
         var details = testDetails.get();
 
-        var test = testProcessor.createTest(context, details, stopTime);
-        tests.add(test);
+        var newTest = testProcessor.createTest(context, details, stopTime);
+
+        if (tests.contains(newTest)) {
+            handleTestRerun(newTest);
+        }
+        tests.add(newTest);
     }
 
     @Override
     public void testSuccessful(ExtensionContext context) {
-        findTestByContext(context).ifPresent(test -> test.setStatus(PASSED));
+        findTestByContext(context).ifPresent(test -> {
+            test.setStatus(PASSED);
+            if (test.getRetries() != null && test.getRetries() > 0) {
+                test.setFlaky(true);
+            }
+        });
     }
 
     @Override
@@ -132,5 +142,14 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
         return tests.stream()
             .filter(t -> t.getName().equals(context.getDisplayName()))
             .findFirst();
+    }
+
+    private void handleTestRerun(Test newTest) {
+        var existingTest = tests.get(tests.indexOf(newTest));
+        int retries = existingTest.getRetries() == null ? 1 : existingTest.getRetries() + 1;
+        newTest.setRetries(retries);
+        newTest.setMessage(existingTest.getMessage());
+        newTest.setTrace(existingTest.getTrace());
+        tests.remove(existingTest);
     }
 }
