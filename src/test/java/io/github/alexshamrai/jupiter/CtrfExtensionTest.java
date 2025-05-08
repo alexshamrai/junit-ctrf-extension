@@ -1,5 +1,6 @@
 package io.github.alexshamrai.jupiter;
 
+import io.github.alexshamrai.BaseTest;
 import io.github.alexshamrai.CtrfJsonComposer;
 import io.github.alexshamrai.CtrfReportFileService;
 import io.github.alexshamrai.SuiteExecutionErrorHandler;
@@ -25,7 +26,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class CtrfExtensionTest {
+public class CtrfExtensionTest extends BaseTest {
 
     @Mock
     private CtrfReportFileService ctrfReportFileService;
@@ -76,10 +77,12 @@ public class CtrfExtensionTest {
     void testBeforeAllTests() {
         var existingTests = new ArrayList<Test>();
         when(ctrfReportFileService.getExistingTests()).thenReturn(existingTests);
+        when(ctrfReportFileService.getExistingStartTime()).thenReturn(1000L);
 
         ctrfExtension.beforeAllTests(extensionContext);
 
         verify(ctrfReportFileService).getExistingTests();
+        verify(ctrfReportFileService).getExistingStartTime();
 
         try {
             Field testRunStartTimeField = CtrfExtension.class.getDeclaredField("testRunStartTime");

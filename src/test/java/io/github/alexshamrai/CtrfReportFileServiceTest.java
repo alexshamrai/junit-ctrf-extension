@@ -144,9 +144,42 @@ public class CtrfReportFileServiceTest {
     void shouldHandleErrorWhenReadingExistingReport() throws IOException {
         Files.writeString(Paths.get(filePath), "invalid json");
 
-        List<io.github.alexshamrai.ctrf.model.Test> existingTests = ctrfReportFileService.getExistingTests();
+        var existingTests = ctrfReportFileService.getExistingTests();
 
         assertThat(existingTests).isEmpty();
         assertThat(errContent.toString()).contains("Failed to read existing report file");
+    }
+
+    @Test
+    void shouldReturnNullWhenReportFileDoesNotExist() {
+        var startTime = ctrfReportFileService.getExistingStartTime();
+
+        assertThat(startTime).isNull();
+    }
+
+    @Test
+    void shouldReturnStartTimeFromExistingReport() {
+        var expectedStartTime = 1234567890L;
+        var summary = io.github.alexshamrai.ctrf.model.Summary.builder().start(expectedStartTime).build();
+        var results = Results.builder().summary(summary).build();
+        var ctrfJsonWithSummary = CtrfJson.builder().results(results).build();
+
+        ctrfReportFileService.writeResultsToFile(ctrfJsonWithSummary);
+
+        var existingStartTime = ctrfReportFileService.getExistingStartTime();
+
+        assertThat(existingStartTime).isEqualTo(expectedStartTime);
+    }
+
+    @Test
+    void shouldReturnNullWhenExistingReportHasNoSummary() {
+        var results = Results.builder().summary(null).build();
+        var ctrfJsonWithoutSummary = CtrfJson.builder().results(results).build();
+
+        ctrfReportFileService.writeResultsToFile(ctrfJsonWithoutSummary);
+
+        var existingStartTime = ctrfReportFileService.getExistingStartTime();
+
+        assertThat(existingStartTime).isNull();
     }
 }
