@@ -6,6 +6,8 @@ plugins {
 group = rootProject.group
 version = rootProject.ext.projectVersion
 
+apply from: rootProject.file('gradle/timeline-visualization.gradle')
+
 repositories {
     mavenCentral()
 }
@@ -75,6 +77,7 @@ tasks.register('generateCtrfReport', Test) {
     }
 
     ignoreFailures = true
+    finalizedBy(addTimelineVisualizationToCtrfReport)
 }
 
 tasks.register('validateCtrfReport', Test) {
@@ -90,6 +93,7 @@ tasks.register('validateCtrfReport', Test) {
 }
 
 check.dependsOn validateCtrfReport
+test.finalizedBy(addTimelineVisualization)
 
 // Explicitly mark this module as not for publishing
 jar {

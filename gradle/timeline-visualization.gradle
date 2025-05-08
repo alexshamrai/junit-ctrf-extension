@@ -1,0 +1,613 @@
+import groovy.json.JsonSlurper
+
+import java.text.SimpleDateFormat
+
+// Helper function to add timeline visualization to a report
+def addTimelineVisualizationToReport(reportFilePath, ctrfReportFilePath) {
+    try {
+        def reportFile = file(reportFilePath)
+        def ctrfReportFile = file(ctrfReportFilePath)
+
+        if (reportFile.exists() && ctrfReportFile.exists()) {
+            // Parse the CTRF report
+            def jsonSlurper = new JsonSlurper()
+            def ctrfReport = jsonSlurper.parse(ctrfReportFile)
+
+            // Extract test data and summary
+            def tests = ctrfReport.results.tests
+            def summary = ctrfReport.results.summary
+
+            // Generate timeline visualization HTML
+            def timelineHtml = generateTimelineHtml(tests, summary)
+
+            // Inject the timeline visualization into the test report
+            def reportContent = reportFile.text
+            def modifiedContent = reportContent.replace('</div>\n</body>', """</div>\n</body>""")
+
+            // Check if logs section exists and insert timeline after it
+            if (modifiedContent.contains('<div id="logFiles">')) {
+                modifiedContent = modifiedContent.replace('</div>\n</body>', """
+<div id="timeline">
+    <h2>Test Timeline</h2>
+    ${timelineHtml}
+</div>
+</div>
+</body>
+                """)
+            } else {
+                // Fallback if logs section doesn't exist
+                modifiedContent = modifiedContent.replace('</div>\n</body>', """
+<div id="timeline">
+    <h2>Test Timeline</h2>
+    ${timelineHtml}
+</div>
+</div>
+</body>
+                """)
+            }
+            reportFile.text = modifiedContent
+
+            println "Timeline visualization added to test report at: ${reportFile.absolutePath}"
+            return true
+        } else {
+            if (!reportFile.exists()) {
+                println "Test report file not found at: ${reportFile.absolutePath}"
+            }
+            if (!ctrfReportFile.exists()) {
+                println "CTRF report file not found at: ${ctrfReportFile.absolutePath}"
+            }
+            return false
+        }
+    } catch (Exception e) {
+        // Log the error but don't fail the build
+        println "WARNING: Failed to add timeline visualization to test report: ${e.message}"
+        e.printStackTrace()
+        return false
+    }
+}
+
+// Task for adding timeline visualization to the default test report
+tasks.register('addTimelineVisualization') {
+    doLast {
+        addTimelineVisualizationToReport(
+            'build/reports/tests/test/index.html',
+            'build/test-results/test/ctrf-report.json'
+        )
+    }
+}
+
+// Task for adding timeline visualization to the generateCtrfReport task's report
+tasks.register('addTimelineVisualizationToCtrfReport') {
+    doLast {
+        addTimelineVisualizationToReport(
+            'build/reports/tests/generateCtrfReport/index.html',
+            'build/test-results/ctrf-report.json'
+        )
+    }
+}
+
+// Helper method to format UTC timestamp to datetime string
+// CTRF already provides timestamps in UTC, so no conversion needed
+def convertTimestampToUtc(long timestampMs) {
+    def date = new Date(timestampMs)
+    def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+    sdf.timeZone = TimeZone.getTimeZone("UTC")
+    return sdf.format(date) + " UTC"
+}
+
+// Generate the timeline visualization HTML
+def generateTimelineHtml(tests, summary) {
+    def overallStart = summary.start
+    def overallStop = summary.stop
+    def overallStartUtc = convertTimestampToUtc(overallStart)
+    def overallStopUtc = convertTimestampToUtc(overallStop)
+
+    // Prepare test data for visualization
+    def testData = []
+    tests.each { test ->
+        def testName = test.name
+        def status = test.status
+        def startTime = test.start
+        def stopTime = test.stop
+        def duration = test.duration
+        def filepath = test.filepath ?: 'Unknown'
+        def threadName = test.threadId ?: filepath
+
+        def startTimeUtc = convertTimestampToUtc(startTime)
+        def stopTimeUtc = convertTimestampToUtc(stopTime)
+
+        testData << [
+                testName    : testName,
+                threadName  : threadName,
+                status      : status,
+                startTime   : startTime,
+                stopTime    : stopTime,
+                startTimeUtc: startTimeUtc,
+                stopTimeUtc : stopTimeUtc,
+                duration    : duration,
+                filepath    : filepath
+        ]
+    }
+
+    // Sort test data by start time
+    testData.sort { it.startTime }
+
+    // Define color maps for test status
+    def colorMap = [
+            'passed' : 'rgba(76, 175, 80, 0.8)',
+            'failed' : 'rgba(244, 67, 54, 0.8)',
+            'skipped': 'rgba(158, 158, 158, 0.8)',
+            'pending': 'rgba(255, 152, 0, 0.8)'
+    ]
+    def borderColorMap = [
+            'passed' : 'rgb(56, 142, 60)',
+            'failed' : 'rgb(211, 47, 47)',
+            'skipped': 'rgb(117, 117, 117)',
+            'pending': 'rgb(245, 124, 0)'
+    ]
+
+    // Get unique thread names for grouping
+    def threadNames = testData.collect { it.threadName }.unique()
+
+    // Prepare data for Vis.js Timeline
+    def items = []
+    def groups = []
+
+    // Create groups for each thread
+    threadNames.eachWithIndex { threadName, index ->
+        groups << [
+                id     : index,
+                content: threadName
+        ]
+    }
+
+    // Create items for each test
+    def itemId = 0
+    threadNames.eachWithIndex { threadName, groupId ->
+        def threadTests = testData.findAll { it.threadName == threadName }
+        threadTests.each { test ->
+            def color = colorMap[test.status.toLowerCase()] ?: 'rgba(33, 150, 243, 0.8)'
+            def borderColor = borderColorMap[test.status.toLowerCase()] ?: 'rgb(25, 118, 210)'
+
+            items << [
+                    id     : itemId++,
+                    group  : groupId,
+                    content: test.testName,
+                    title  : """
+                    <div class="tooltip-title">${test.testName}</div>
+                    <div class="tooltip-content">
+                        <span class="tooltip-label">Status:</span> ${test.status}<br>
+                        <span class="tooltip-label">Start:</span> ${test.startTimeUtc} <span style="font-size: 0.9em; color: #64748b;">(${test.startTime})</span><br>
+                        <span class="tooltip-label">End:</span> ${test.stopTimeUtc} <span style="font-size: 0.9em; color: #64748b;">(${test.stopTime})</span><br>
+                        <span class="tooltip-label">Duration:</span> ${String.format("%.3f", test.duration / 1000)} s<br>
+                        <span class="tooltip-label">File:</span> ${test.filepath}
+                    </div>
+                """,
+                    start  : test.startTime,
+                    end    : test.stopTime,
+                    type   : 'range',
+                    style  : "background-color: ${color}; border-color: ${borderColor};"
+            ]
+        }
+    }
+
+    // Convert to JSON for JavaScript
+    def jsonTestData = groovy.json.JsonOutput.toJson([
+            items       : items,
+            groups      : groups,
+            overallStart: overallStart,
+            overallStop : overallStop
+    ])
+
+    // Generate HTML with Vis.js Timeline
+    def html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            .timeline-container {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 20px 0;
+                background-color: #fff;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                padding: 20px;
+            }
+            .summary {
+                display: flex;
+                flex-wrap: wrap;
+                margin-bottom: 20px;
+                justify-content: space-between;
+            }
+            .summary-item {
+                background-color: #f8f9fa;
+                padding: 12px;
+                margin: 5px;
+                border-radius: 8px;
+                min-width: 120px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                transition: transform 0.2s;
+            }
+            .summary-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            .chart-container {
+                position: relative;
+                height: 400px;
+                margin: 30px 0;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            /* Vis.js Timeline custom styles */
+            .vis-timeline {
+                border: none;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .vis-item {
+                border-width: 1px;
+                border-radius: 4px;
+                font-size: 12px;
+                color: #1e293b;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+
+            .vis-item .vis-item-content {
+                padding: 4px 8px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .vis-item.vis-selected {
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+            }
+
+            .vis-time-axis .vis-text {
+                color: #64748b;
+                font-size: 11px;
+            }
+
+            .vis-group-label {
+                font-weight: 600;
+                color: #334155;
+            }
+            .test-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 30px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            .test-table th, .test-table td {
+                border: none;
+                padding: 12px 15px;
+                text-align: left;
+            }
+            .test-table th {
+                background-color: #f1f5f9;
+                color: #334155;
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 0.85em;
+                letter-spacing: 0.5px;
+            }
+            .test-table tr {
+                border-bottom: 1px solid #e2e8f0;
+            }
+            .test-table tr:last-child {
+                border-bottom: none;
+            }
+            .test-table tr:nth-child(even) {
+                background-color: #f8fafc;
+            }
+            .test-table tr:hover {
+                background-color: #f1f5f9;
+            }
+            .status-badge {
+                display: inline-block;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 0.85em;
+                font-weight: 500;
+                text-transform: uppercase;
+            }
+            .status-passed {
+                background-color: #ecfdf5;
+                color: #047857;
+            }
+            .status-failed {
+                background-color: #fef2f2;
+                color: #b91c1c;
+            }
+            .status-skipped {
+                background-color: #f3f4f6;
+                color: #4b5563;
+            }
+            .status-pending {
+                background-color: #fffbeb;
+                color: #b45309;
+            }
+            h2 {
+                color: #334155;
+                font-weight: 600;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #e2e8f0;
+            }
+            .tooltip-title {
+                font-weight: bold;
+                margin-bottom: 5px;
+                font-size: 14px;
+                color: #334155;
+            }
+            .tooltip-content {
+                font-size: 12px;
+                color: #64748b;
+            }
+            .tooltip-label {
+                font-weight: 600;
+                color: #475569;
+            }
+        </style>
+        <script src="https://cdn.jsdelivr.net/npm/vis-timeline@7.7.2/standalone/umd/vis-timeline-graph2d.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vis-data@7.1.6/standalone/umd/vis-data.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/vis-timeline@7.7.2/dist/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+    </head>
+    <body>
+        <div class="timeline-container">
+            <h2>Test Execution Timeline</h2>
+
+            <div class="summary">
+                <div class="summary-item">
+                    <strong>Total Tests:</strong> ${summary.tests}
+                </div>
+                <div class="summary-item">
+                    <strong>Passed:</strong> <span style="color: #047857;">${summary.passed}</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Failed:</strong> <span style="color: #b91c1c;">${summary.failed}</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Skipped:</strong> <span style="color: #4b5563;">${summary.skipped}</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Pending:</strong> <span style="color: #b45309;">${summary.pending}</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Start:</strong> ${overallStartUtc}<br>
+                    <span style="font-size: 0.8em; color: #64748b;">${overallStart}</span>
+                </div>
+                <div class="summary-item">
+                    <strong>End:</strong> ${overallStopUtc}<br>
+                    <span style="font-size: 0.8em; color: #64748b;">${overallStop}</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Duration:</strong> ${formatDuration(overallStop - overallStart)}
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div id="timelineChart"></div>
+            </div>
+
+            <table class="test-table">
+                <tr>
+                    <th>Test Name</th>
+                    <th>Status</th>
+                    <th>Start Time<br><span style="font-size: 0.8em; font-weight: normal;">(UTC time & timestamp)</span></th>
+                    <th>End Time<br><span style="font-size: 0.8em; font-weight: normal;">(UTC time & timestamp)</span></th>
+                    <th>Duration</th>
+                    <th>Thread</th>
+                </tr>
+                ${generateEnhancedTableRows(testData)}
+            </table>
+        </div>
+
+        <script>
+            // Parse the test data from Groovy
+            const testData = ${jsonTestData};
+
+            // Create the timeline
+            const container = document.getElementById('timelineChart');
+
+            // Configuration for the Timeline
+            const options = {
+                zoomable: true,
+                moveable: true,
+                min: testData.overallStart,
+                max: testData.overallStop,
+                start: testData.overallStart,
+                end: testData.overallStop,
+                showCurrentTime: false,
+                stack: false,
+                stackSubgroups: false,
+                tooltip: {
+                    followMouse: true,
+                    overflowMethod: 'cap'
+                },
+                orientation: 'top',
+                height: '400px',
+                format: {
+                    minorLabels: {
+                        millisecond: 'SSS',
+                        second: 'HH:mm:ss',
+                        minute: 'HH:mm',
+                        hour: 'HH:mm',
+                        day: 'MMM D',
+                        month: 'MMM YYYY',
+                        year: 'YYYY'
+                    },
+                    majorLabels: {
+                        millisecond: 'HH:mm:ss',
+                        second: 'D MMMM HH:mm',
+                        minute: 'ddd D MMMM',
+                        hour: 'ddd D MMMM',
+                        day: 'MMMM YYYY',
+                        month: 'YYYY',
+                        year: ''
+                    }
+                }
+            };
+
+            // Create a DataSet with items
+            const items = new vis.DataSet(testData.items);
+
+            // Create a DataSet with groups
+            const groups = new vis.DataSet(testData.groups);
+
+            // Create the Timeline
+            const timeline = new vis.Timeline(container, items, groups, options);
+        </script>
+    </body>
+    </html>
+    """
+
+    return html
+}
+
+// Generate timeline items HTML
+def generateTimelineItems(testData, overallStart, overallStop) {
+    def totalDuration = overallStop - overallStart
+    def html = new StringBuilder()
+
+    // Group tests by thread name
+    def testsByThread = testData.groupBy { it.threadName }
+
+    // Create a timeline item for each thread
+    testsByThread.each { threadName, threadTests ->
+        html.append("""
+            <div class="timeline-item">
+                <div class="timeline-label">${threadName}</div>
+                <div class="timeline-thread" style="position: relative; height: 30px;">
+        """)
+
+        // Add test bars for this thread
+        threadTests.each { test ->
+            def relativeStart = ((test.startTime - overallStart) / totalDuration) * 100
+            def relativeDuration = (test.duration / totalDuration) * 100
+            def statusClass = test.status ?: 'other'
+
+            html.append("""
+                    <div class="timeline-bar-container" style="position: absolute; left: ${relativeStart}%; width: ${relativeDuration}%;">
+                        <div class="timeline-bar ${statusClass}" style="width: 100%; height: 20px;"></div>
+                        <div class="timeline-tooltip">
+                            <strong>${test.testName}</strong><br>
+                            Status: ${test.status}<br>
+                            Start: ${test.startTimeUtc} <span style="font-size: 0.9em; color: #64748b;">(${test.startTime})</span><br>
+                            End: ${test.stopTimeUtc} <span style="font-size: 0.9em; color: #64748b;">(${test.stopTime})</span><br>
+                            Duration: ${String.format("%.3f", test.duration / 1000)} s<br>
+                            File: ${test.filepath}
+                        </div>
+                    </div>
+            """)
+        }
+
+        html.append("""
+                </div>
+            </div>
+        """)
+    }
+
+    return html.toString()
+}
+
+// Generate timeline axis with time marks
+def generateTimelineAxis(overallStart, overallStop) {
+    def totalDuration = overallStop - overallStart
+    def html = new StringBuilder()
+
+    html.append("""
+        <div class="timeline-axis">
+    """)
+
+    // Calculate appropriate interval for time marks based on total duration
+    def interval = calculateAxisInterval(totalDuration)
+
+    // Generate marks at regular intervals
+    def currentTime = 0
+    while (currentTime <= totalDuration) {
+        def position = (currentTime / totalDuration) * 100
+        def label = formatDuration(currentTime)
+
+        html.append("""
+            <div class="timeline-axis-mark" style="left: ${position}%;">
+                ${label}
+            </div>
+        """)
+
+        currentTime += interval
+    }
+
+    html.append("""
+        </div>
+    """)
+
+    return html.toString()
+}
+
+// Calculate appropriate interval for axis marks based on total duration
+def calculateAxisInterval(totalDuration) {
+    // Choose an interval that will result in a reasonable number of marks
+    if (totalDuration <= 1000) { // <= 1 second
+        return 100 // 100ms intervals
+    } else if (totalDuration <= 5000) { // <= 5 seconds
+        return 500 // 500ms intervals
+    } else if (totalDuration <= 30000) { // <= 30 seconds
+        return 5000 // 5s intervals
+    } else if (totalDuration <= 120000) { // <= 2 minutes
+        return 10000 // 10s intervals
+    } else if (totalDuration <= 300000) { // <= 5 minutes
+        return 30000 // 30s intervals
+    } else if (totalDuration <= 1800000) { // <= 30 minutes
+        return 60000 // 1m intervals
+    } else {
+        return 300000 // 5m intervals
+    }
+}
+
+// Format duration in a human-readable way
+def formatDuration(duration) {
+    if (duration < 1000) {
+        return "${duration}ms"
+    } else if (duration < 60000) {
+        def seconds = duration / 1000
+        return String.format("%.2fs", seconds)
+    } else if (duration < 3600000) {
+        def minutes = (duration / 60000).intValue()
+        def seconds = ((duration % 60000) / 1000)
+        return String.format("%dm %.2fs", minutes, seconds)
+    } else {
+        def hours = (duration / 3600000).intValue()
+        def minutes = ((duration % 3600000) / 60000).intValue()
+        def seconds = ((duration % 60000) / 1000)
+        return String.format("%dh %dm %.2fs", hours, minutes, seconds)
+    }
+}
+
+// Generate enhanced table rows HTML with status badges
+def generateEnhancedTableRows(testData) {
+    def html = new StringBuilder()
+
+    testData.each { test ->
+        def statusClass = "status-${test.status.toLowerCase()}"
+
+        html.append("""
+            <tr>
+                <td>${test.testName}</td>
+                <td><span class="status-badge ${statusClass}">${test.status}</span></td>
+                <td>${test.startTimeUtc}<br><span style="font-size: 0.8em; color: #64748b;">${test.startTime}</span></td>
+                <td>${test.stopTimeUtc}<br><span style="font-size: 0.8em; color: #64748b;">${test.stopTime}</span></td>
+                <td>${formatDuration(test.duration)}</td>
+                <td>${test.threadName}</td>
+            </tr>
+        """)
+    }
+
+    return html.toString()
+}
