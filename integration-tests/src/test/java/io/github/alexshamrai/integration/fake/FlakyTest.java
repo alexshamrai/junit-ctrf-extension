@@ -16,7 +16,8 @@ public class FlakyTest extends BaseFakeTest {
 
     @Test
     @DisplayName("Flaky test passed on the second run")
-    public void flakyTestPassesOnTheSecondRun() {
+    public void flakyTestPassesOnTheSecondRun() throws InterruptedException {
+        Thread.sleep(500);
         File counterFile = new File("build/tmp/flakyTestCounter.txt");
         int runCounter = 1;
 

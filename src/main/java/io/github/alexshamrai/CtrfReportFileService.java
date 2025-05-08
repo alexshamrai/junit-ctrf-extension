@@ -61,6 +61,22 @@ public class CtrfReportFileService {
     }
 
     /**
+     * Gets the start time from an existing report if available.
+     * If the start time exists in the previous report, it should be returned.
+     * If no report exists or the start time cannot be extracted, returns null.
+     *
+     * @return Long representing the start time from the existing report, or null if not available
+     */
+    public Long getExistingStartTime() {
+        CtrfJson existingReport = readExistingReport();
+        if (existingReport != null && existingReport.getResults() != null
+            && existingReport.getResults().getSummary() != null) {
+            return existingReport.getResults().getSummary().getStart();
+        }
+        return null;
+    }
+
+    /**
      * Reads an existing CTRF JSON report file if it exists.
      *
      * @return CtrfJson object containing the report data, or null if the file doesn't exist or can't be read

@@ -61,7 +61,8 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
 
     @Override
     public void beforeAllTests(ExtensionContext context) {
-        testRunStartTime = System.currentTimeMillis();
+        Long existingStartTime = ctrfReportFileService.getExistingStartTime();
+        testRunStartTime = existingStartTime != null ? existingStartTime : System.currentTimeMillis();
         testDetails.set(createTestDetails(context));
         tests.addAll(ctrfReportFileService.getExistingTests());
     }
