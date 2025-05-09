@@ -19,6 +19,7 @@ import static io.github.alexshamrai.ctrf.model.Test.TestStatus.FAILED;
 import static io.github.alexshamrai.ctrf.model.Test.TestStatus.PASSED;
 import static io.github.alexshamrai.ctrf.model.Test.TestStatus.SKIPPED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -233,7 +234,7 @@ public class CtrfExtensionTest extends BaseTest {
         ctrfExtension.afterEach(extensionContext);
 
         assertEquals(1, secondTest.getRetries());
-        assertEquals("Original message", secondTest.getMessage());
-        assertEquals("Original trace", secondTest.getTrace());
+        assertNull(secondTest.getMessage());
+        assertNull(secondTest.getTrace());
     }
 }
