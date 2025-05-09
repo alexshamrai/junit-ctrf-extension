@@ -71,9 +71,9 @@ public class CtrfLogicTest {
         var summary = report.getResults().getSummary();
         assertThat(summary).isNotNull();
 
-        assertThat(summary.getTests()).isEqualTo(17);
+        assertThat(summary.getTests()).isEqualTo(20);
         assertThat(summary.getPassed()).isEqualTo(13);
-        assertThat(summary.getFailed()).isEqualTo(2);
+        assertThat(summary.getFailed()).isEqualTo(5);
         assertThat(summary.getSkipped()).isEqualTo(2);
         assertThat(summary.getPending()).isEqualTo(0);
         assertThat(summary.getOther()).isEqualTo(0);
@@ -161,11 +161,10 @@ public class CtrfLogicTest {
         var tests = report.getResults().getTests();
         var flakyTest = tests.stream()
             .filter(test -> test.getName().equals("Flaky test passed on the second run"))
+            .filter(test -> test.getStatus().equals(TestStatus.PASSED))
             .findFirst().get();
 
         assertThat(flakyTest.getFlaky()).isTrue();
         assertThat(flakyTest.getRetries()).isPositive();
-        assertThat(flakyTest.getMessage()).isNotEmpty();
-        assertThat(flakyTest.getTrace()).isNotEmpty();
     }
 }

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.TestWatcher;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 import static io.github.alexshamrai.ctrf.model.Test.TestStatus.FAILED;
 import static io.github.alexshamrai.ctrf.model.Test.TestStatus.PASSED;
@@ -98,17 +99,24 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
 
         var newTest = testProcessor.createTest(context, details, stopTime);
 
-        if (tests.contains(newTest)) {
-            handleTestRerun(newTest);
+        var sameNameTests = findTestsByName(context.getDisplayName());
+        if (!sameNameTests.isEmpty()) {
+            handleTestRerun(newTest, sameNameTests);
         }
+
         tests.add(newTest);
     }
 
     @Override
     public void testSuccessful(ExtensionContext context) {
-        findTestByContext(context).ifPresent(test -> {
+        findLatestTestByContext(context).ifPresent(test -> {
             test.setStatus(PASSED);
-            if (test.getRetries() != null && test.getRetries() > 0) {
+
+            var previousTests = findPreviousTestsByName(context.getDisplayName(), test);
+            boolean hadPreviousFailures = previousTests.stream()
+                .anyMatch(t -> FAILED.equals(t.getStatus()));
+
+            if (hadPreviousFailures || (test.getRetries() != null && test.getRetries() > 0)) {
                 test.setFlaky(true);
             }
         });
@@ -116,7 +124,7 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
 
     @Override
     public void testFailed(ExtensionContext context, Throwable cause) {
-        findTestByContext(context).ifPresent(test -> {
+        findLatestTestByContext(context).ifPresent(test -> {
             test.setStatus(FAILED);
             testProcessor.setFailureDetails(test, cause);
         });
@@ -141,16 +149,31 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
 
     private Optional<Test> findTestByContext(ExtensionContext context) {
         return tests.stream()
-            .filter(t -> t.getName().equals(context.getDisplayName()))
+            .filter(t -> t.getName() != null && t.getName().equals(context.getDisplayName()))
             .findFirst();
     }
 
-    private void handleTestRerun(Test newTest) {
-        var existingTest = tests.get(tests.indexOf(newTest));
-        int retries = existingTest.getRetries() == null ? 1 : existingTest.getRetries() + 1;
-        newTest.setRetries(retries);
-        newTest.setMessage(existingTest.getMessage());
-        newTest.setTrace(existingTest.getTrace());
-        tests.remove(existingTest);
+    private Optional<Test> findLatestTestByContext(ExtensionContext context) {
+        String displayName = context.getDisplayName();
+        return tests.stream()
+            .filter(t -> t.getName() != null && t.getName().equals(displayName))
+            .reduce((first, second) -> second);
+    }
+
+    private List<Test> findTestsByName(String name) {
+        return tests.stream()
+            .filter(t -> t.getName() != null && t.getName().equals(name))
+            .collect(Collectors.toList());
+    }
+
+    private List<Test> findPreviousTestsByName(String name, Test currentTest) {
+        return tests.stream()
+            .filter(t -> t.getName() != null && t.getName().equals(name) && t != currentTest)
+            .collect(Collectors.toList());
+    }
+
+    private void handleTestRerun(Test newTest, List<Test> previousTests) {
+        int retryCount = previousTests.size();
+        newTest.setRetries(retryCount);
     }
 }
