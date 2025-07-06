@@ -126,6 +126,9 @@
               "trace": {
                 "type": "string"
               },
+              "snippet": {
+                "type": "string"
+              },
               "ai": {
                 "type": "string"
               },
