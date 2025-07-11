@@ -2,6 +2,7 @@ package io.github.alexshamrai.jupiter;
 
 import io.github.alexshamrai.CtrfJsonComposer;
 import io.github.alexshamrai.CtrfReportFileService;
+import io.github.alexshamrai.StartupDurationProcessor;
 import io.github.alexshamrai.SuiteExecutionErrorHandler;
 import io.github.alexshamrai.TestProcessor;
 import io.github.alexshamrai.config.ConfigReader;
@@ -57,7 +58,8 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
         this.ctrfReportFileService = new CtrfReportFileService(configReader);
         this.testProcessor = new TestProcessor(configReader);
         this.suiteExecutionErrorHandler = new SuiteExecutionErrorHandler(testProcessor);
-        this.ctrfJsonComposer = new CtrfJsonComposer(configReader);
+        var startupDurationProcessor = new StartupDurationProcessor();
+        this.ctrfJsonComposer = new CtrfJsonComposer(configReader, startupDurationProcessor);
     }
 
     @Override

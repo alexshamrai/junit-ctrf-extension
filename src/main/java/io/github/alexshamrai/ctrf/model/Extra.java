@@ -1,3 +1,4 @@
+
 package io.github.alexshamrai.ctrf.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -16,4 +17,5 @@ import java.util.Map;
 public class Extra {
 
     private Map<String, Object> customData;
+    private Long startupDuration;
 }

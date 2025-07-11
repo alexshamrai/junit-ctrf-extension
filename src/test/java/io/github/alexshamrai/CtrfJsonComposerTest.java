@@ -19,12 +19,14 @@ public class CtrfJsonComposerTest extends BaseTest {
     private static final String DEFAULT_REPORT_FORMAT = "CTRF";
     private static final String DEFAULT_SPEC_VERSION = "0.0.0";
     private ConfigReader configReader;
+    private StartupDurationProcessor startupDurationProcessor;
     private CtrfJsonComposer composer;
 
     @BeforeEach
     void setUp() {
         configReader = Mockito.mock(ConfigReader.class);
-        composer = new CtrfJsonComposer(configReader);
+        startupDurationProcessor = new StartupDurationProcessor();
+        composer = new CtrfJsonComposer(configReader, startupDurationProcessor);
 
         Mockito.when(configReader.getJUnitVersion()).thenReturn("mockedJUnitVersion");
         Mockito.when(configReader.getReportName()).thenReturn("mockedReportName");
@@ -41,6 +43,7 @@ public class CtrfJsonComposerTest extends BaseTest {
         Mockito.when(configReader.getOsRelease()).thenReturn("mockedOsRelease");
         Mockito.when(configReader.getOsVersion()).thenReturn("mockedOsVersion");
         Mockito.when(configReader.getTestEnvironment()).thenReturn("mockedTestEnvironment");
+        Mockito.when(configReader.calculateStartupDuration()).thenReturn(false);
     }
 
     @org.junit.jupiter.api.Test
@@ -104,5 +107,32 @@ public class CtrfJsonComposerTest extends BaseTest {
         assertNotNull(result.getResults());
         assertEquals(tests, result.getResults().getTests());
         assertNull(result.getResults().getSummary());
+    }
+
+    @org.junit.jupiter.api.Test
+    void testGenerateCtrfJsonWithStartupDurationCalculation() {
+        Mockito.when(configReader.calculateStartupDuration()).thenReturn(true);
+
+        long summaryStartTime = 2000L;
+        var summary = Summary.builder()
+            .start(summaryStartTime)
+            .build();
+
+        long firstTestStartTime = 5000L;
+        long secondTestStartTime = 6000L;
+        var tests = List.of(
+            Test.builder().start(secondTestStartTime).build(),
+            Test.builder().start(firstTestStartTime).build()
+        );
+
+        long expectedStartupDuration = 3000L;
+
+        var result = composer.generateCtrfJson(summary, tests);
+
+        assertNotNull(result);
+        assertNotNull(result.getResults());
+        assertNotNull(result.getResults().getSummary());
+        assertNotNull(result.getResults().getSummary().getExtra());
+        assertEquals(expectedStartupDuration, result.getResults().getSummary().getExtra().getStartupDuration());
     }
 }

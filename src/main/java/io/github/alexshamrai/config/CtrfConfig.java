@@ -77,4 +77,8 @@ public interface CtrfConfig extends Config {
 
     @Key("ctrf.test.environment")
     String testEnvironment();
+
+    @Key("ctrf.calculate.startup.duration")
+    @DefaultValue("false")
+    boolean calculateStartupDuration();
 }

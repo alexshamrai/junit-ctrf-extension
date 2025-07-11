@@ -23,6 +23,7 @@ public class CtrfJsonComposer {
 
     private static final String TOOL_NAME = "JUnit";
     private final ConfigReader configReader;
+    private final StartupDurationProcessor startupDurationProcessor;
 
     /**
      * Generates a complete CTRF JSON object containing test results and metadata.
@@ -33,6 +34,10 @@ public class CtrfJsonComposer {
      *         reportFormat (set to "CTRF") and specVersion (set to "0.0.0")
      */
     public CtrfJson generateCtrfJson(Summary summary, List<Test> tests) {
+        if (configReader.calculateStartupDuration()) {
+            startupDurationProcessor.processStartupDuration(summary, tests);
+        }
+
         var results = Results.builder()
             .tool(composeTool())
             .summary(summary)
