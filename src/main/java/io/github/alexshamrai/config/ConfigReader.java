@@ -93,4 +93,8 @@ public class ConfigReader {
     public String getTestEnvironment() {
         return config.testEnvironment();
     }
+
+    public boolean calculateStartupDuration() {
+        return config.calculateStartupDuration();
+    }
 }
