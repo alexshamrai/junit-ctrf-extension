@@ -39,7 +39,7 @@ jobs:
         if: always()
 
       - name: Publish CTRF Test Report
-        uses: ctrf-io/github-test-reporter@v1.0.17
+        uses: ctrf-io/github-test-reporter@v1.0.18
         with:
           report-path: 'integration-tests/build/test-results/ctrf-report.json'
 
