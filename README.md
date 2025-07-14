@@ -129,25 +129,26 @@ test {
 
 The following parameters can be configured in the `ctrf.properties` file:
 
-| Parameter                 | Description                                            | Default Value      |
-|---------------------------|--------------------------------------------------------|--------------------|
-| `ctrf.report.path`        | The file path where the CTRF report will be saved      | `ctrf-report.json` |
-| `ctrf.max.message.length` | Maximum length for error messages in the report        | `500`              |
-| `junit.version`           | The version of JUnit used in your project              |                    |
-| `ctrf.report.name`        | Name of the test report                                |                    |
-| `ctrf.app.name`           | Name of the application under test                     |                    |
-| `ctrf.app.version`        | Version of the application under test                  |                    |
-| `ctrf.build.name`         | Name or ID of the build                                |                    |
-| `ctrf.build.number`       | Build number from your CI/CD system                    |                    |
-| `ctrf.build.url`          | URL to the build in your CI/CD system                  |                    |
-| `ctrf.repository.name`    | Name of the source code repository                     |                    |
-| `ctrf.repository.url`     | URL to the source code repository                      |                    |
-| `ctrf.commit`             | Commit hash of the code being tested                   |                    |
-| `ctrf.branch.name`        | Name of the source control branch                      |                    |
-| `ctrf.os.platform`        | Operating system platform                              |                    |
-| `ctrf.os.release`         | OS release identifier                                  |                    |
-| `ctrf.os.version`         | OS version details                                     |                    |
-| `ctrf.test.environment`   | Test environment identifier (e.g., dev, staging, prod) |                    |
+| Parameter                         | Description                                                  | Default Value      |
+|-----------------------------------|--------------------------------------------------------------|--------------------|
+| `ctrf.report.path`                | The file path where the CTRF report will be saved            | `ctrf-report.json` |
+| `ctrf.max.message.length`         | Maximum length for error messages in the report              | `500`              |
+| `ctrf.calculate.startup.duration` | Whether to calculate and include test suite startup duration | `false`            |
+| `junit.version`                   | The version of JUnit used in your project                    |                    |
+| `ctrf.report.name`                | Name of the test report                                      |                    |
+| `ctrf.app.name`                   | Name of the application under test                           |                    |
+| `ctrf.app.version`                | Version of the application under test                        |                    |
+| `ctrf.build.name`                 | Name or ID of the build                                      |                    |
+| `ctrf.build.number`               | Build number from your CI/CD system                          |                    |
+| `ctrf.build.url`                  | URL to the build in your CI/CD system                        |                    |
+| `ctrf.repository.name`            | Name of the source code repository                           |                    |
+| `ctrf.repository.url`             | URL to the source code repository                            |                    |
+| `ctrf.commit`                     | Commit hash of the code being tested                         |                    |
+| `ctrf.branch.name`                | Name of the source control branch                            |                    |
+| `ctrf.os.platform`                | Operating system platform                                    |                    |
+| `ctrf.os.release`                 | OS release identifier                                        |                    |
+| `ctrf.os.version`                 | OS version details                                           |                    |
+| `ctrf.test.environment`           | Test environment identifier (e.g., dev, staging, prod)       |                    |
 
 All mandatory parameters have default values
 
