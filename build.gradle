@@ -15,16 +15,16 @@ ext {
     projectVersion = '0.3.6-SNAPSHOT'
     releaseVersion = '0.3.5'
 
-    junitVersion = '5.13.3'
+    junitVersion = '5.13.4'
     lombokVersion = '1.18.38'
-    jaksonVersion = '2.19.1'
+    jaksonVersion = '2.19.2'
     ownerVersion = '1.0.12'
     mockitoVersion = '5.18.0'
-    assertjVersion = '3.27.3'
+    assertjVersion = '3.27.4'
 
     slf4jVersion = '2.0.17'
     logbackVersion = '1.5.18'
-    jacksonModuleJsonSchemaVersion = '2.19.1'
+    jacksonModuleJsonSchemaVersion = '2.19.2'
     jsonSchemaValidatorVersion = '2.2.14'
 }
 
