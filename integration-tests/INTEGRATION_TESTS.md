@@ -135,6 +135,13 @@ The integration tests support parallel execution through the `threads` system pr
 
 This configures JUnit to run tests concurrently, which helps verify that the CTRF extension correctly handles parallel test execution.
 
+## Run tests exactly as in CI
+
+To run the integration tests exactly as in CI, in order to verify all the parameters processing locally(dynamic parameters, like build.number and build.url are hardcoded here):
+```bash
+./gradlew clean :integration-tests:validateCtrfReport -Dthreads=2 -Dctrf.build.name=system-build -Dctrf.build.number=777 -Dctrf.build.url=https://github.com/alexshamrai/junit-ctrf-extension/actions/runs/12345678
+```
+
 ## Adding New Integration Tests
 
 To add new test scenarios:
