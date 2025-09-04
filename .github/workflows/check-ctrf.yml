@@ -34,8 +34,8 @@ jobs:
           ./gradlew :integration-tests:validateCtrfReport \
           -Dthreads=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.threads || '2' }} \
           -Dctrf.build.name=system-build \
-          -Dctrf.build.number=789 \
-          -Dctrf.build.url=http://system.example.com/build/
+          -Dctrf.build.number=${{ github.run_number }} \
+          -Dctrf.build.url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} \
         if: always()
 
       - name: Publish CTRF Test Report

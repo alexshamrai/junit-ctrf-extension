@@ -149,11 +149,11 @@ public class CtrfLogicTest {
             .as("Build name should match the value passed via -Dctrf.build.name")
             .isEqualTo("system-build");
         assertThat(environment.getBuildNumber())
-            .as("Build number should match the value passed via -Dctrf.build.number")
-            .isEqualTo("789");
+            .as("Build number should be numeric")
+            .matches("\\d+");
         assertThat(environment.getBuildUrl())
-            .as("Build URL should match the value passed via -Dctrf.build.url")
-            .isEqualTo("http://system.example.com/build/");
+            .as("Build URL should follow the pattern https://github.com/alexshamrai/junit-ctrf-extension/actions/runs/ + number")
+            .matches("https://github\\.com/alexshamrai/junit-ctrf-extension/actions/runs/\\d+");
     }
 
     @Test
