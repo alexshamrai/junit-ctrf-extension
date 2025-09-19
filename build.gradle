@@ -11,6 +11,19 @@ repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+compileJava {
+    options.release = 17
+    options.encoding = 'UTF-8'
+}
+
 ext {
     projectVersion = '0.3.6-SNAPSHOT'
     releaseVersion = '0.3.5'
