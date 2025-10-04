@@ -34,10 +34,11 @@ Using Gradle:
 
 ### Running Tests
 
+The solution uses JUnit 5 for unit testing. Run the tests with:
 ```bash
-./gradlew test -x :integration-tests:test
+./gradlew :test
 ```
-Note: integration tests are not a part of pipeline, yet. 
+For integration tests info refer to [INTEGRATION_TESTS.md](INTEGRATION_TESTS.md)
 
 ### Code Quality Checks
 

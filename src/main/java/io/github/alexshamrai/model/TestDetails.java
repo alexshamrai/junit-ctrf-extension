@@ -11,4 +11,6 @@ public class TestDetails {
     private long startTime;
     private Set<String> tags;
     private String filePath;
+    private String uniqueId;
+    private String displayName;
 }

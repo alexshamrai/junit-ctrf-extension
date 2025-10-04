@@ -47,6 +47,7 @@ dependencies {
     implementation platform("org.junit:junit-bom:${junitVersion}")
     implementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
     implementation "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+    implementation "org.junit.platform:junit-platform-launcher"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jaksonVersion}"
     implementation "org.aeonbits.owner:owner:${ownerVersion}"
     compileOnly "org.projectlombok:lombok:${lombokVersion}"

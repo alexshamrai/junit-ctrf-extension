@@ -1,6 +1,5 @@
 package io.github.alexshamrai.config;
 
-import io.github.alexshamrai.BaseTest;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +9,7 @@ import java.util.HashMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class ConfigReaderTest extends BaseTest {
+public class ConfigReaderTest {
 
     private CtrfConfig mockConfig;
 

@@ -1,6 +1,5 @@
 package io.github.alexshamrai.util;
 
-import io.github.alexshamrai.BaseTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
@@ -13,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TestDetailsUtilTest extends BaseTest {
+public class TestDetailsUtilTest {
 
     @Test
     void createTestDetails_shouldReturnTestDetailsWithProperValues_whenContextHasAllDetails() {

@@ -1,9 +1,9 @@
-# JUnit CTRF Extension
+# JUnit CTRF Reporter
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.alexshamrai/junit-ctrf-extension.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.alexshamrai%22%20AND%20a:%22junit-ctrf-extension%22)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-A JUnit 5 extension that generates test reports following the standardized [CTRF (Common Test Report Format)](https://ctrf.io/) specification.
+A JUnit 5 library that generates test reports following the standardized [CTRF (Common Test Report Format)](https://ctrf.io/) specification, providing both a JUnit Jupiter Extension and a JUnit Platform TestExecutionListener.
 
 ## What is CTRF?
 
@@ -55,7 +55,31 @@ Add to your `pom.xml` file:
 </dependency>
 ```
 
-### Register JUnit Extension
+## Usage options
+
+There are two ways to use the CTRF reporter: as a JUnit Jupiter Extension or as a JUnit Platform TestExecutionListener.
+
+### 1. Use CtrfListener (JUnit Platform TestExecutionListener)
+This approach is suitable when you need to enable CTRF reporting globally for all tests executed by the JUnit Platform, without modifying individual test classes.
+ Register the listener by creating a file named org.junit.platform.launcher.TestExecutionListener in your src/test/resources/META-INF/services directory and add the fully qualified name of the listener:
+```
+io.github.alexshamrai.launcher.CtrfListener
+```
+
+Programmatically:
+If you are invoking the JUnit Platform Launcher directly, you can register the listener programmatically:
+``` java
+// Example with LauncherDiscoveryRequest
+LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
+    .selectors(selectPackage("com.example"))
+    .build();
+
+Launcher launcher = LauncherFactory.create();
+launcher.registerTestExecutionListeners(new CtrfListener());
+launcher.execute(request);
+```
+
+### 2. Register CtrfExtension
 
 To use the JUnit CTRF Extension, you need to register it in your JUnit test class. You can do this by adding the `@ExtendWith` annotation to your test class:
 
@@ -69,7 +93,7 @@ public class MyTest {
     }
 }
 ```
-
+It allows you to configure a report only for custom classes
 For more details on JUnit extensions, see the [JUnit 5 User Guide](https://junit.org/junit5/docs/current/user-guide/#extensions).
 
 ### Configure Properties

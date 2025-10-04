@@ -80,7 +80,7 @@ tasks.register('addTimelineVisualization') {
 tasks.register('addTimelineVisualizationToCtrfReport') {
     doLast {
         addTimelineVisualizationToReport(
-            'build/reports/tests/generateCtrfReport/index.html',
+            'build/reports/tests/test/index.html',
             'build/test-results/ctrf-report.json'
         )
     }

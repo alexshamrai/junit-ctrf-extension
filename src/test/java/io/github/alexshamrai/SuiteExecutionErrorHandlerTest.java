@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
 
-public class SuiteExecutionErrorHandlerTest extends BaseTest {
+public class SuiteExecutionErrorHandlerTest {
 
     @Mock
     private TestProcessor testProcessor;

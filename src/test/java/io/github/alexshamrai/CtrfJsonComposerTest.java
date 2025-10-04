@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class CtrfJsonComposerTest extends BaseTest {
+public class CtrfJsonComposerTest {
 
     private static final String DEFAULT_REPORT_FORMAT = "CTRF";
     private static final String DEFAULT_SPEC_VERSION = "0.0.0";
