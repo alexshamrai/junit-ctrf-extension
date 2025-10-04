@@ -1,0 +1,76 @@
+plugins {
+    id 'java'
+}
+
+group = rootProject.group
+version = rootProject.ext.projectVersion
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.slf4j:slf4j-api:${rootProject.ext.slf4jVersion}"
+    implementation "ch.qos.logback:logback-classic:${rootProject.ext.logbackVersion}"
+
+    implementation "com.fasterxml.jackson.core:jackson-databind:${rootProject.ext.jaksonVersion}"
+    implementation "com.fasterxml.jackson.module:jackson-module-jsonSchema:${rootProject.ext.jacksonModuleJsonSchemaVersion}"
+    implementation "com.github.java-json-tools:json-schema-validator:${rootProject.ext.jsonSchemaValidatorVersion}"
+
+    testImplementation platform("org.junit:junit-bom:${rootProject.ext.junitVersion}")
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation project(':')
+
+    testImplementation "org.assertj:assertj-core:${rootProject.ext.assertjVersion}"
+}
+
+def configureThreads(Test task) {
+    def threads = System.getProperty("threads")
+    println "${task.name} - Configured number of threads: ${threads ?: 'not set'}"
+
+    if (threads?.isInteger()) {
+        def threadsNumber = threads.toInteger()
+        if (threadsNumber > 1) {
+            task.systemProperties += [
+                    'junit.jupiter.execution.parallel.enabled'                   : true,
+                    'junit.jupiter.execution.parallel.mode.default'              : 'concurrent',
+                    'junit.jupiter.execution.parallel.mode.classes.default'      : 'concurrent',
+                    'junit.jupiter.execution.parallel.config.strategy'           : 'fixed',
+                    'junit.jupiter.execution.parallel.config.fixed.parallelism'  : threadsNumber,
+                    'junit.jupiter.execution.parallel.config.fixed.max-pool-size': threadsNumber
+            ]
+        }
+    } else {
+        println "Invalid or missing 'threads' property. Default settings will be used."
+    }
+}
+
+test {
+    useJUnitPlatform()
+
+    systemProperties += System.properties.findAll { k, v -> k.toString().startsWith("ctrf") }
+}
+
+// Explicitly mark this module as not for publishing
+jar {
+    enabled = true  // We want the jar for local use
+    archiveClassifier = 'tests'  // Mark as tests artifact
+}
+
+// Explicitly disable all publishing tasks
+tasks.matching { it.name.contains('publish') }.configureEach {
+    enabled = false
+}
+
+// Disable Maven publication configurations
+tasks.withType(GenerateMavenPom).configureEach {
+    enabled = false
+}
+
+tasks.withType(PublishToMavenRepository).configureEach {
+    enabled = false
+}
+
+tasks.withType(PublishToMavenLocal).configureEach {
+    enabled = false
+}

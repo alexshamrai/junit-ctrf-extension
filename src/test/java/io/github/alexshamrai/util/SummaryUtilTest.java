@@ -1,6 +1,5 @@
 package io.github.alexshamrai.util;
 
-import io.github.alexshamrai.BaseTest;
 import io.github.alexshamrai.ctrf.model.Test;
 import io.github.alexshamrai.ctrf.model.Test.TestStatus;
 
@@ -9,7 +8,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class SummaryUtilTest extends BaseTest {
+class SummaryUtilTest {
 
     @org.junit.jupiter.api.Test
     void shouldCreateSummaryWithCorrectCounts() {
