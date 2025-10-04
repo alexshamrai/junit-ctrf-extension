@@ -28,7 +28,7 @@ ext {
     projectVersion = '0.3.7-SNAPSHOT'
     releaseVersion = '0.3.6'
 
-    junitVersion = '5.13.3'
+    junitVersion = '6.0.0'
     lombokVersion = '1.18.38'
     jaksonVersion = '2.19.1'
     ownerVersion = '1.0.12'
