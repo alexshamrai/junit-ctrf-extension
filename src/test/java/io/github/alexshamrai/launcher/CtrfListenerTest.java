@@ -77,7 +77,7 @@ public class CtrfListenerTest {
     @Test
     void testPlanExecutionStarted_shouldDelegateToManager() {
         ctrfListener.testPlanExecutionStarted(testPlan);
-        verify(reportManager).startTestRun();
+        verify(reportManager).startTestRun("io.github.alexshamrai.launcher.CtrfListener");
     }
 
     @Test

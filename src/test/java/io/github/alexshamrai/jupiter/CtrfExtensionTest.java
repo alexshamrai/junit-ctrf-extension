@@ -60,7 +60,7 @@ public class CtrfExtensionTest {
     @Test
     void beforeAllTests_shouldDelegateToManager() {
         ctrfExtension.beforeAllTests(extensionContext);
-        verify(reportManager).startTestRun();
+        verify(reportManager).startTestRun("io.github.alexshamrai.jupiter.CtrfExtension");
     }
 
     @Test

@@ -46,10 +46,11 @@ import java.util.stream.Collectors;
 public class CtrfListener implements TestExecutionListener {
 
     private final CtrfReportManager reportManager = CtrfReportManager.getInstance();
+    private static final String GENERATED_BY = "io.github.alexshamrai.launcher.CtrfListener";
 
     @Override
     public void testPlanExecutionStarted(TestPlan testPlan) {
-        reportManager.startTestRun();
+        reportManager.startTestRun(GENERATED_BY);
     }
 
     @Override

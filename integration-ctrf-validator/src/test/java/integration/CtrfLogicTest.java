@@ -141,4 +141,19 @@ public class CtrfLogicTest extends BaseIntegrationTest {
         assertThat(flakyTest.getFlaky()).isTrue();
         assertThat(flakyTest.getRetries()).isPositive();
     }
+
+    @Test
+    void verifyGeneratedByFieldIsCorrect() {
+        String reportPath = System.getProperty("ctrf.report.path", "");
+        if (reportPath.contains("listener")) {
+            assertThat(report.getGeneratedBy())
+                .as("The 'generatedBy' field should be set by the listener")
+                .isEqualTo("io.github.alexshamrai.launcher.CtrfListener");
+        } else {
+            assertThat(report.getGeneratedBy())
+                .as("The 'generatedBy' field should be set by the extension")
+                .isEqualTo("io.github.alexshamrai.jupiter.CtrfExtension");
+        }
+    }
 }
+

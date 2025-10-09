@@ -25,6 +25,7 @@ public final class CtrfReportManager {
     private final ConcurrentHashMap<String, TestDetails> testDetailsMap = new ConcurrentHashMap<>();
     private long testRunStartTime;
     private final AtomicBoolean isTestRunStarted = new AtomicBoolean(false);
+    private String generator;
 
     private final CtrfReportFileService ctrfReportFileService;
     private final TestProcessor testProcessor;
@@ -36,8 +37,7 @@ public final class CtrfReportManager {
         this.ctrfReportFileService = new CtrfReportFileService(configReader);
         this.testProcessor = new TestProcessor(configReader);
         this.suiteExecutionErrorHandler = new SuiteExecutionErrorHandler(testProcessor);
-        var startupDurationProcessor = new StartupDurationProcessor();
-        this.ctrfJsonComposer = new CtrfJsonComposer(configReader, startupDurationProcessor);
+        this.ctrfJsonComposer = null;
     }
 
     /**
@@ -99,8 +99,9 @@ public final class CtrfReportManager {
         processTestResult(uniqueId, Optional.ofNullable(cause), FAILED);
     }
 
-    public void startTestRun() {
+    public void startTestRun(String generator) {
         if (isTestRunStarted.compareAndSet(false, true)) {
+            this.generator = generator;
             Long existingStartTime = ctrfReportFileService.getExistingStartTime();
             testRunStartTime = existingStartTime != null ? existingStartTime : System.currentTimeMillis();
             tests.addAll(ctrfReportFileService.getExistingTests());
@@ -126,8 +127,15 @@ public final class CtrfReportManager {
             suiteExecutionErrorHandler.handleExecutionError(context, lastTestStopTime, testRunStopTime).ifPresent(tests::add);
         }
 
+        var composer = this.ctrfJsonComposer;
+        if (composer == null) {
+            var configReader = new ConfigReader();
+            var startupProcessor = new StartupDurationProcessor();
+            composer = new CtrfJsonComposer(configReader, startupProcessor, this.generator);
+        }
+
         var summary = SummaryUtil.createSummary(tests, testRunStartTime, testRunStopTime);
-        var ctrfJson = ctrfJsonComposer.generateCtrfJson(summary, tests);
+        var ctrfJson = composer.generateCtrfJson(summary, tests);
 
         ctrfReportFileService.writeResultsToFile(ctrfJson);
         tests.clear();
