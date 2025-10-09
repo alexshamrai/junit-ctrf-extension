@@ -13,8 +13,8 @@ This document provides instructions for setting up the JUnit CTRF Extension proj
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/alexshamrai/junit-ctrf-extension.git
-cd junit-ctrf-extension
+git clone https://github.com/alexshamrai/junit-ctrf-reporter.git
+cd junit-ctrf-reporter
 ```
 
 ### Build the Project

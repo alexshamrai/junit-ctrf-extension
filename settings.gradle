@@ -1,4 +1,4 @@
-rootProject.name = 'junit-ctrf-extension'
+rootProject.name = 'junit-ctrf-reporter'
 include 'integration-tests-extension'
 include 'integration-tests-listener'
 include 'integration-ctrf-validator'
