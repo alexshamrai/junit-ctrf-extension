@@ -126,8 +126,8 @@ public class CtrfLogicTest extends BaseIntegrationTest {
             .as("Build number should be numeric")
             .matches("\\d+");
         assertThat(environment.getBuildUrl())
-            .as("Build URL should follow the pattern https://github.com/alexshamrai/junit-ctrf-extension/actions/runs/ + number")
-            .matches("https://github\\.com/alexshamrai/junit-ctrf-extension/actions/runs/\\d+");
+            .as("Build URL should follow the pattern https://github.com/alexshamrai/junit-ctrf-reporter/actions/runs/ + number")
+            .matches("https://github\\.com/alexshamrai/junit-ctrf-reporter/actions/runs/\\d+");
     }
 
     @Test

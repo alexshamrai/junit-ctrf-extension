@@ -1,6 +1,6 @@
 # JUnit CTRF Reporter
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.alexshamrai/junit-ctrf-extension.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.alexshamrai%22%20AND%20a:%22junit-ctrf-extension%22)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.alexshamrai/junit-ctrf-reporter.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.alexshamrai%22%20AND%20a:%22junit-ctrf-reporter%22)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 A JUnit 5 library that generates test reports following the standardized [CTRF (Common Test Report Format)](https://ctrf.io/) specification, providing both a JUnit Jupiter Extension and a JUnit Platform TestExecutionListener.
@@ -39,7 +39,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.github.alexshamrai:junit-ctrf-extension:0.3.6'
+    implementation 'io.github.alexshamrai:junit-ctrf-reporter:0.4.0'
 }
 ```
 
@@ -50,8 +50,8 @@ Add to your `pom.xml` file:
 ```xml
 <dependency>
     <groupId>io.github.alexshamrai</groupId>
-    <artifactId>junit-ctrf-extension</artifactId>
-    <version>0.3.6</version>
+    <artifactId>junit-ctrf-reporter</artifactId>
+    <version>0.4.0</version>
 </dependency>
 ```
 
@@ -190,4 +190,4 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## Support
 
-If you encounter any issues or have questions, please [open an issue](https://github.com/alexshamrai/junit-ctrf-extension/issues) on GitHub.
+If you encounter any issues or have questions, please [open an issue](https://github.com/alexshamrai/junit-ctrf-reporter/issues) on GitHub.
