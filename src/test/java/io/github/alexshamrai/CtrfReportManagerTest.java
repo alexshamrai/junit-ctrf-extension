@@ -64,8 +64,8 @@ class CtrfReportManagerTest {
         when(ctrfReportFileService.getExistingStartTime()).thenReturn(1000L);
         when(ctrfReportFileService.getExistingTests()).thenReturn(Collections.emptyList());
 
-        reportManager.startTestRun();
-        reportManager.startTestRun(); // This second call should do nothing
+        reportManager.startTestRun("Listener");
+        reportManager.startTestRun("Listener"); // This second call should do nothing
 
         verify(ctrfReportFileService, times(1)).getExistingStartTime();
         verify(ctrfReportFileService, times(1)).getExistingTests();
@@ -158,7 +158,7 @@ class CtrfReportManagerTest {
         reportManager.onTestStart(TestDetails.builder().uniqueId("id-1").displayName("test").build());
         reportManager.onTestSuccess("id-1");
 
-        reportManager.startTestRun();
+        reportManager.startTestRun("Listener");
 
         try (MockedStatic<SummaryUtil> summaryUtil = Mockito.mockStatic(SummaryUtil.class)) {
             var mockReport = CtrfJson.builder().build();
@@ -178,7 +178,7 @@ class CtrfReportManagerTest {
     void finishTestRun_handlesInitializationError() {
         when(ctrfReportFileService.getExistingTests()).thenReturn(Collections.emptyList());
 
-        reportManager.startTestRun();
+        reportManager.startTestRun("Listener");
         reportManager.finishTestRun(Optional.of(extensionContext));
 
         verify(suiteExecutionErrorHandler).handleInitializationError(eq(extensionContext), anyLong(), anyLong());
@@ -194,7 +194,7 @@ class CtrfReportManagerTest {
 
         when(extensionContext.getExecutionException()).thenReturn(Optional.of(new RuntimeException()));
 
-        reportManager.startTestRun();
+        reportManager.startTestRun("Listener");
         reportManager.finishTestRun(Optional.of(extensionContext));
 
         verify(suiteExecutionErrorHandler).handleExecutionError(eq(extensionContext), eq(12345L), anyLong());

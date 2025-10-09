@@ -9,7 +9,9 @@ import io.github.alexshamrai.ctrf.model.Test;
 import io.github.alexshamrai.ctrf.model.Tool;
 import lombok.RequiredArgsConstructor;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Composes the final CTRF JSON object from test results and configuration.
@@ -24,14 +26,14 @@ public class CtrfJsonComposer {
     private static final String TOOL_NAME = "JUnit";
     private final ConfigReader configReader;
     private final StartupDurationProcessor startupDurationProcessor;
+    private final String generatedBy;
 
     /**
      * Generates a complete CTRF JSON object containing test results and metadata.
      *
      * @param summary the test execution summary
      * @param tests the list of test results
-     * @return a complete CTRF JSON object ready for serialization with required fields:
-     *         reportFormat (set to "CTRF") and specVersion (set to "0.0.0")
+     * @return a complete CTRF JSON object ready for serialization
      */
     public CtrfJson generateCtrfJson(Summary summary, List<Test> tests) {
         if (configReader.calculateStartupDuration()) {
@@ -44,8 +46,12 @@ public class CtrfJsonComposer {
             .tests(tests)
             .environment(composeEnvironment())
             .build();
+
         return CtrfJson.builder()
             .results(results)
+            .reportId(UUID.randomUUID().toString())
+            .timestamp(Instant.now().toString())
+            .generatedBy(this.generatedBy)
             .build();
     }
 

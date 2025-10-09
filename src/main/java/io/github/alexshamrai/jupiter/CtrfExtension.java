@@ -2,7 +2,6 @@ package io.github.alexshamrai.jupiter;
 
 import io.github.alexshamrai.CtrfReportManager;
 import io.github.alexshamrai.model.TestDetails;
-import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
@@ -20,7 +19,7 @@ import java.util.Optional;
  * {@code
  * @ExtendWith(CtrfExtension.class)
  * public class MyTest {
- *     // test methods
+ * // test methods
  * }
  * }
  * </pre>
@@ -28,13 +27,14 @@ import java.util.Optional;
  * The extension can be configured through a {@code ctrf.properties} file placed in the classpath.
  * See the README for all available configuration options.
  */
-public class CtrfExtension implements TestRunExtension, BeforeEachCallback, AfterEachCallback, TestWatcher {
+public class CtrfExtension implements TestRunExtension, BeforeEachCallback, TestWatcher {
 
     private final CtrfReportManager reportManager = CtrfReportManager.getInstance();
+    private static final String GENERATED_BY = "io.github.alexshamrai.jupiter.CtrfExtension";
 
     @Override
     public void beforeAllTests(ExtensionContext context) {
-        reportManager.startTestRun();
+        reportManager.startTestRun(GENERATED_BY);
     }
 
     @Override
@@ -65,11 +65,6 @@ public class CtrfExtension implements TestRunExtension, BeforeEachCallback, Afte
     @Override
     public void testDisabled(ExtensionContext context, Optional<String> reason) {
         reportManager.onTestSkipped(createTestDetails(context), reason);
-    }
-
-    @Override
-    public void afterEach(ExtensionContext context) {
-        // No longer needed
     }
 
     private TestDetails createTestDetails(ExtensionContext context) {

@@ -26,7 +26,7 @@ public class CtrfJsonComposerTest {
     void setUp() {
         configReader = Mockito.mock(ConfigReader.class);
         startupDurationProcessor = new StartupDurationProcessor();
-        composer = new CtrfJsonComposer(configReader, startupDurationProcessor);
+        composer = new CtrfJsonComposer(configReader, startupDurationProcessor, "Listener");
 
         Mockito.when(configReader.getJUnitVersion()).thenReturn("mockedJUnitVersion");
         Mockito.when(configReader.getReportName()).thenReturn("mockedReportName");
