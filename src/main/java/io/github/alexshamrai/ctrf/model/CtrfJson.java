@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 /**
  * Model class representing the root structure of the Common Test Reporting Format (CTRF) JSON.
  *
@@ -37,10 +39,30 @@ public class CtrfJson {
     private String specVersion = "0.0.0";
 
     /**
+     * A unique identifier for the report, typically a UUID.
+     */
+    private String reportId;
+
+    /**
+     * The timestamp when the report was generated, in ISO 8601 format.
+     */
+    private String timestamp;
+
+    /**
+     * Information about the tool or system that generated the report.
+     */
+    private String generatedBy;
+
+    /**
      * Container for test execution results and related data.
-     * This field holds all test execution information including test statuses, 
+     * This field holds all test execution information including test statuses,
      * execution times, and any associated metadata defined in the CTRF specification.
      * When serialized to JSON, this becomes the "results" object in the CTRF structure.
      */
     private Results results;
+
+    /**
+     * A key-value map for any extra, non-standard data.
+     */
+    private Map<String, Object> extra;
 }
