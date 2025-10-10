@@ -5,6 +5,8 @@
 
 A JUnit 5 library that generates test reports following the standardized [CTRF (Common Test Report Format)](https://ctrf.io/) specification, providing both a JUnit Jupiter Extension and a JUnit Platform TestExecutionListener.
 
+Requires Java 17 or higher.
+
 ## What is CTRF?
 
 CTRF is a universal JSON test report schema that addresses the lack of a standardized format for JSON test reports.
