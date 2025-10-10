@@ -28,7 +28,7 @@ ext {
     projectVersion = '0.4.1-SNAPSHOT'
     releaseVersion = '0.4.0'
 
-    junitVersion = '5.14.0'
+    junitVersion = '6.0.0'
     lombokVersion = '1.18.42'
     jaksonVersion = '2.20.0'
     ownerVersion = '1.0.12'
@@ -62,7 +62,7 @@ test {
 }
 
 checkstyle {
-    toolVersion = '10.26.1'
+    toolVersion = '12.0.0'
     configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
 }
 
