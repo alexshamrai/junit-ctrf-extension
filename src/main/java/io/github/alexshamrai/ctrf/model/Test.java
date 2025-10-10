@@ -25,6 +25,7 @@ public class Test {
     private String suite;
     private String message;
     private String trace;
+    private String snippet;
     private Integer line;
     private String ai;
     private String rawStatus;
@@ -33,9 +34,12 @@ public class Test {
     private String filepath;
     private Integer retries;
     private Boolean flaky;
+    private List<String> stdout;
+    private List<String> stderr;
     private String browser;
     private String device;
     private String screenshot;
+    private List<Object> attachments;
     private String threadId;
     private Map<String, Object> parameters;
     private List<Step> steps;
